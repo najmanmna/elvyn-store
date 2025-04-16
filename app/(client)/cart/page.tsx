@@ -12,10 +12,6 @@ import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import EmptyCart from "@/components/EmptyCart";
-import {
-  createCheckoutSession,
-  Metadata,
-} from "@/actions/createCheckoutSession";
 import { client } from "@/sanity/lib/client";
 import { Address, ADDRESS_QUERYResult } from "@/sanity.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,24 +68,7 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
-    setLoading(true);
-    try {
-      const metadata: Metadata = {
-        orderNumber: crypto.randomUUID(),
-        customerName: user?.fullName ?? "Unknown",
-        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
-        clerkUserId: user!.id,
-        address: selectedAddress,
-      };
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      }
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-    } finally {
-      setLoading(false);
-    }
+    toast.success("Cart need to be initialized!");
   };
 
   const handleDeleteProduct = (id: string) => {
