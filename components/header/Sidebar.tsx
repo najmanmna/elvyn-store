@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { motion } from "motion/react";
-import Logo from "../Logo";
+import Logo from "../LogoWhite";
 import Link from "next/link";
 import { useOutsideClick } from "@/hooks";
 import SocialMedia from "../SocialMedia";
@@ -28,25 +28,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.3 }}
         ref={sidebarRef}
-        className="min-w-72 max-w-96 bg-tech_dark z-50 h-screen p-10 border-r border-r-tech_orange flex flex-col gap-6"
+        className="min-w-72 max-w-96 bg-tech_black z-50 h-screen p-10 border-r border-r-tech_white flex flex-col gap-6"
       >
         <div className="flex items-center justify-between">
           <Logo />
           <button
             onClick={onClose}
-            className="hover:text-tech_orange hoverEffect"
+            className="hover:text-tech_white hoverEffect"
           >
             <X />
           </button>
         </div>
-        <div className="flex flex-col gap-3.5 text-base font-semibold tracking-wide">
+        <div className="flex flex-col gap-3.5 text-base text-white font-semibold tracking-wide">
           {headerData?.map((item) => (
             <Link
               onClick={onClose}
               key={item?.title}
               href={item?.href}
-              className={`hover:text-tech_orange hoverEffect ${
-                pathname === item?.href && "text-tech_orange"
+              className={`hover:text-gray-300 hoverEffect ${
+                pathname === item?.href && "text-tech_white"
               }`}
             >
               {item?.title}

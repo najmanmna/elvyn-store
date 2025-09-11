@@ -54,42 +54,37 @@ const ImageView = ({ images = [], isStock }: Props) => {
       <div className="w-full md:w-2/5 space-y-2 md:space-y-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={active?._key}
+            key={active?._key ?? "img-active"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
             className="w-full max-h-[550px] min-h-[450px] border border-tech_dark_color/10 rounded-md group overflow-hidden cursor-pointer"
-            onClick={() =>
-              openModal(images.findIndex((img) => img._key === active._key))
-            }
+            onClick={() => openModal(images.findIndex((img) => img._key === active?._key))}
           >
-            <Image
-              src={urlFor(active).url()}
-              alt="productImage"
-              width={700}
-              height={700}
-              priority
-              className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${
-                isStock === 0 ? "opacity-50" : ""
-              }`}
-            />
+            {active && (
+              <Image
+                src={urlFor(active).url()}
+                alt="productImage"
+                width={700}
+                height={700}
+                priority
+                className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${isStock === 0 ? "opacity-50" : ""}`}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
+
         <div className="flex flex-wrap gap-2 items-center justify-center">
-          {images.map((image) => (
+          {images.map((image, idx) => (
             <button
-              key={image._key}
-              onClick={() => {
-                setActive(image);
-              }}
-              className={`border rounded-md overflow-hidden w-16 h-16 ${
-                active._key === image._key ? "ring-1 ring-tech_dark_color" : ""
-              }`}
+              key={`${image._key ?? "img"}-${idx}`} // ensure uniqueness if _key duplicates
+              onClick={() => setActive(image)}
+              className={`border rounded-md overflow-hidden w-16 h-16 ${active?._key === image._key ? "ring-1 ring-tech_dark_color" : ""}`}
             >
               <Image
                 src={urlFor(image).url()}
-                alt={`Thumbnail ${image._key}`}
+                alt={`Thumbnail ${image._key ?? idx}`}
                 width={100}
                 height={100}
                 className="w-full h-auto object-contain"
@@ -110,9 +105,9 @@ const ImageView = ({ images = [], isStock }: Props) => {
             onClick={closeModal}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               className="bg-white rounded-lg max-w-2xl w-full p-4 relative"
               onClick={(e) => e.stopPropagation()}
             >
@@ -125,20 +120,15 @@ const ImageView = ({ images = [], isStock }: Props) => {
 
               <Carousel className="w-full" opts={{ startIndex: initialSlide }}>
                 <CarouselContent>
-                  {images.map((image) => (
-                    <CarouselItem key={image._key}>
+                  {images.map((image, idx) => (
+                    <CarouselItem key={`${image._key ?? "img"}-modal-${idx}`}>
                       <div className="flex items-center justify-center h-[500px]">
-                        <Image
-                          src={urlFor(image).url()}
-                          alt={`Product image ${image._key}`}
-                          width={800}
-                          height={800}
-                          className="object-contain max-h-full"
-                        />
+                        <Image src={urlFor(image).url()} alt={`Product image ${image._key ?? idx}`} width={800} height={800} className="object-contain max-h-full" />
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
+
                 <CarouselPrevious className="-left-4" />
                 <CarouselNext className="-right-4" />
               </Carousel>

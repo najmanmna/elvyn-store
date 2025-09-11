@@ -1,44 +1,44 @@
 import React from "react";
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 import { SanityLive } from "@/sanity/lib/live";
 import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
-const trebuchet = localFont({
-  src: "../fonts/Trebuc.ttf",
-  variable: "--font-trebuchet",
+
+// Import Google Font (Poppins) with multiple weights
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"], // adjust weights as needed
+  variable: "--font-poppins",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    template: "%s - Shoptech online store",
-    default: "Shoptech online store",
+    template: "%s - Elvyn",
+    default: "Elvyn",
   },
-  description: "Shoptech online store, Your one stop shop for all your needs",
+  description: "Elvyn online store, Your one stop shop for all your needs",
 };
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${trebuchet.variable} antialiased bg-tech_bg_color`}>
-          {children}
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: "#000000",
-                color: "#fff",
-              },
-            }}
-          />
-          <SanityLive />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className={`${poppins.variable} antialiased bg-tech_bg_color`}>
+        {children}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "#000000",
+              color: "#fff",
+            },
+          }}
+        />
+        <SanityLive />
+      </body>
+    </html>
   );
 };
 

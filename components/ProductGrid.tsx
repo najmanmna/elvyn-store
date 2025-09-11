@@ -8,20 +8,23 @@ import { Loader2 } from "lucide-react";
 import Container from "./Container";
 import { ALL_PRODUCTS_QUERYResult } from "@/sanity.types";
 import Title from "./Title";
+import Link from "next/link";
 
 const ProductGrid = () => {
   const [products, setProducts] = useState<ALL_PRODUCTS_QUERYResult>([]);
   const [loading, setLoading] = useState(false);
-  const query = `*[_type == "product"] | order(name asc)[0...20]{
-  ...,"categories": categories[]->title
-}`;
+
+  const query = `*[_type == "product" && isFeatured == true] | order(name asc)[0...10]{
+    ...,
+    "categories": categories[]->title
+  }`;
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await client.fetch(query);
-        setProducts(await response);
+        const response: ALL_PRODUCTS_QUERYResult = await client.fetch(query);
+        setProducts(response);
       } catch (error) {
         console.log("Product fetching Error", error);
       } finally {
@@ -32,22 +35,24 @@ const ProductGrid = () => {
   }, []);
 
   return (
-    <Container className="flex flex-col lg:px-0">
+    <Container className="flex flex-col mt-10 lg:px-0">
       <div className="text-center">
-        <Title className="text-lg font-bold">Featured Products</Title>
-        <p className="text-sm font-medium">Check & Get Your Desired Product!</p>
+        <Title className="text-3xl font-normal mb-8">
+          EXCLUSIVE BAG COLLECTION
+        </Title>
       </div>
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full mt-10">
-          <motion.div className="flex items-center space-x-2 text-blue-600">
+          <motion.div className="flex items-center space-x-2 text-black">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span>Product is loading...</span>
           </motion.div>
         </div>
       ) : products?.length ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-5">
-          <>
-            {products?.map((product) => (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-5">
+            {products.map((product) => (
               <AnimatePresence key={product?._id}>
                 <motion.div
                   layout
@@ -55,12 +60,22 @@ const ProductGrid = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
+                  {/* ✅ use generated type directly */}
                   <ProductCard key={product?._id} product={product} />
                 </motion.div>
               </AnimatePresence>
             ))}
-          </>
-        </div>
+          </div>
+
+          {/* Button below the grid */}
+          <div className="flex justify-center mt-8">
+            <Link href="/shop">
+              <button className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-semibold">
+                CARRY YOUR STORY
+              </button>
+            </Link>
+          </div>
+        </>
       ) : (
         <NoProductAvailable />
       )}

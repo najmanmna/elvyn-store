@@ -1,75 +1,55 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 
-interface ContactItemData {
+interface FeatureItemData {
   title: string;
-  subtitle: string;
-  icon: React.ReactNode;
+  icon: string; // path to image
 }
 
-const data: ContactItemData[] = [
+const data: FeatureItemData[] = [
   {
-    title: "Visit Us",
-    subtitle: "New Orlean, USA",
-    icon: (
-      <MapPin className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
-    ),
+    title: "Fast Delivery",
+    icon: "/fast-delivery.png", // place file in public/icons/
   },
   {
-    title: "Call Us",
-    subtitle: "+12 958 648 597",
-    icon: (
-      <Phone className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
-    ),
+    title: "Durability",
+    icon: "/warranty-period.png",
   },
   {
-    title: "Working Hours",
-    subtitle: "Mon - Sat: 10:00 AM - 7:00 PM",
-    icon: (
-      <Clock className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
-    ),
+    title: "Affordable Luxury",
+    icon: "/star.png",
   },
   {
-    title: "Email Us",
-    subtitle: "Shoptech@gmail.com",
-    icon: (
-      <Mail className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
-    ),
+    title: "Customer Support",
+    icon: "/public-service.png",
   },
 ];
 
 const FooterTop = () => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 border-b">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
       {data.map((item, index) => (
-        <ContactItem
-          key={index}
-          icon={item.icon}
-          title={item.title}
-          content={item.subtitle}
-        />
+        <FeatureItem key={index} icon={item.icon} title={item.title} />
       ))}
     </div>
   );
 };
 
-interface ContactItemProps {
-  icon: React.ReactNode;
+interface FeatureItemProps {
+  icon: string;
   title: string;
-  content: string;
 }
 
-const ContactItem = ({ icon, title, content }: ContactItemProps) => {
+const FeatureItem = ({ icon, title }: FeatureItemProps) => {
   return (
-    <div className="flex items-center gap-3 group hover:bg-gray-50 p-4 transition-colors">
-      {icon}
-      <div>
-        <h3 className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
-          {title}
-        </h3>
-        <p className="text-gray-600 text-sm mt-1 group-hover:text-gray-900 transition-colors">
-          {content}
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center gap-2 group p-4 transition-transform hover:scale-105">
+      <Image
+        src={icon}
+        alt={title}
+        width={50}
+        height={50}
+        className="transition-transform group-hover:scale-110"
+      />
+      <h3 className="font-normal text-gray-900 text-center">{title}</h3>
     </div>
   );
 };

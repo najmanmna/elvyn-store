@@ -1,97 +1,105 @@
 import Link from "next/link";
-import Logo from "../Logo";
+import Logo from "../LogoWhite";
 import SocialMedia from "../SocialMedia";
 import { categoriesData, quickLinksData } from "@/constants";
-import FooterTop from "./FooterTop";
+import { Mail, MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Top section with contact info */}
-        <FooterTop />
-
+    <footer className="bg-black border-t">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Main footer content */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <Logo className="w-40 mb-4" />
-            <p className="text-gray-600 text-sm">
-              Discover curated furniture collections at Shoptech, blending style
-              and comfort to elevate your living spaces.
-            </p>
-            <SocialMedia
-              className="text-tech_dark_color/60"
-              iconClassName="border-tech_dark_color/60 hover:border-tech_orange hover:text-tech_orange"
-              tooltipClassName="bg-tech_dark_color text-white"
-            />
+        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {/* Newsletter + Brand */}
+          <div className="flex flex-col justify-between space-y-6">
+            <div>
+              <p className="text-gray-100 text-sm mb-4">
+                Sign up to our newsletter to receive exclusive offers.
+              </p>
+              <form className="flex flex-col  gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  className="flex-1 px-4 py-2  border border-gray-600 bg-transparent text-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2 w-1/2 bg-gray-200 text-gray-800 font-medium  hover:bg-gray-100 transition-colors"
+                >
+                  SUBSCRIBE
+                </button>
+              </form>
+            </div>
+            <Logo className="w-40" />
           </div>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
-            <ul className="space-y-3">
+          {/* Quick Links */}
+          <div className="flex flex-col sm:ml-10">
+            <h3 className="font-medium text-white mb-4">COMPANY</h3>
+            <ul className="space-y-3 mb-6">
               {quickLinksData?.map((item) => (
                 <li key={item?.title}>
                   <Link
                     href={item?.href}
-                    className="text-gray-600 hover:text-tech_orange text-sm font-medium hoverEffect"
+                    className="text-gray-300 hover:text-white text-sm font-normal transition-colors"
                   >
                     {item?.title}
                   </Link>
                 </li>
               ))}
             </ul>
+            <SocialMedia
+              className="text-white"
+              iconClassName="border-gray-600 hover:border-orange-400 hover:text-white transition-colors"
+              tooltipClassName="bg-gray-800 text-white"
+            />
           </div>
 
+          {/* Reach Us */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Categories</h3>
-            <ul className="space-y-3">
-              {categoriesData.map((item) => (
-                <li key={item?.title}>
-                  <Link
-                    href={`/category/${item?.href}`}
-                    className="text-gray-600 hover:text-tech_orange text-sm font-medium hoverEffect capitalize"
-                  >
-                    {item?.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Newsletter</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Subscribe to our newsletter to receive updates and exclusive
-              offers.
-            </p>
-            <form className="space-y-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-gray-200"
-              />
-              <button
-                type="submit"
-                className="w-full bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+            <h3 className="font-medium text-white mb-4">REACH US</h3>
+            <div className="space-y-4">
+              <p className="flex items-center gap-2 text-gray-300 text-sm">
+                <FaWhatsapp className="w-5 h-5   text-white" />
+                {/* <MessageCircle className="w-4 h-4 text-white" /> */}
+                <a
+                  href="https://wa.me/+947775507540"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  +974 775 507 540
+                </a>
+              </p>
+              <p className="flex items-center gap-2 text-gray-300 text-sm">
+                <Mail className="w-5 h-5 text-white" />
+                <a
+                  href="mailto:elvynstoreofficial@gmail.com"
+                  className="hover:text-white transition-colors"
+                >
+                  elvynstoreofficial@gmail.com
+                </a>
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Bottom copyright section */}
-        <div className="py-6 border-t text-center text-sm text-gray-600">
+        {/* Bottom copyright */}
+        <div className="py-6 border-t border-gray-700 text-center text-sm text-gray-400">
           <p>
             © {new Date().getFullYear()}{" "}
-            <span className="text-tech_dark_color font-black tracking-wider uppercase hover:text-tech_orange hoverEffect group font-sans">
-              Shoptec
-              <span className="text-tech_orange group-hover:text-tech_dark_color hoverEffect">
-                h
-              </span>
-            </span>
+            <span className="text-gray-100 font-semibold tracking-wide uppercase hover:text-white transition-colors">
+              Elvyn
+            </span>{" "}
             . All rights reserved.
+          </p>
+          <p className="mt-1 text-xs">
+            Developed by{" "}
+            <span className="font-semibold text-white hover:text-gray-400 transition-colors">
+              Ahamed Web Studio
+            </span>
           </p>
         </div>
       </div>

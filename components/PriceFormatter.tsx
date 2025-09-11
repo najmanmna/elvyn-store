@@ -6,16 +6,19 @@ interface Props {
 }
 
 const PriceFormatter = ({ amount, className }: Props) => {
-  const formattedPrice = new Number(amount).toLocaleString("en-US", {
-    currency: "USD",
+  if (amount == null) return null;
+
+  const formattedPrice = new Intl.NumberFormat("en-US", {
+    currency: "LKR",
     style: "currency",
-    minimumFractionDigits: 2,
-  });
+    minimumFractionDigits: 0,
+  }).format(amount);
+
   return (
     <span
       className={twMerge(
-        "text-sm font-semibold text-tech_dark_color",
-        className
+        "text-sm font-semibold", // base styles
+        className ?? "text-tech_dark_color" // default color, can be overridden
       )}
     >
       {formattedPrice}

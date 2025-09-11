@@ -6,10 +6,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { getBrand } from "@/sanity/queries";
 
 const ProductCharacteristics = async ({ product }: { product: Product }) => {
-  const brand = await getBrand(product?.slug?.current as string);
+
 
   return (
     <Accordion type="single" collapsible>
@@ -18,14 +17,14 @@ const ProductCharacteristics = async ({ product }: { product: Product }) => {
           {product?.name}: Characteristics
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-1">
-          <p className="flex items-center justify-between">
+          {/* <p className="flex items-center justify-between">
             Brand:{" "}
             {brand && (
               <span className="font-semibold tracking-wide">
                 {brand[0]?.brandName}
               </span>
             )}
-          </p>
+          </p> */}
           <p className="flex items-center justify-between">
             Collection:{" "}
             <span className="font-semibold tracking-wide">2025</span>

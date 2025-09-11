@@ -12,6 +12,8 @@ export const projectId = assertValue(
 )
 
 function assertValue<T>(v: T | undefined, errorMessage: string): T {
+  console.log("SANITYwd DATASET:", process.env.NEXT_PUBLIC_SANITY_DATASET);
+
   if (v === undefined) {
     throw new Error(errorMessage)
   }

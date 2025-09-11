@@ -1,18 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
 @import "tailwindcss";
 
 @plugin 'tailwindcss-animate';
+
+
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   /* Custome color start */
-  --color-tech_bg_color: #f2f4f8;
-  --color-tech_orange: #ef4a23;
+  --color-tech_bg_color: #ffffff;
+  --color-tech_orange: #000000;
   --color-tech_white: #ffffff;
   --color-tech_black: #000000;
-  --color-tech_dark: #081621;
+  --color-tech_dark: #000000;
   --color-tech_light_yellow: #fde8a1;
-  --color-tech_blue: #3749bb;
+  --color-tech_blue: #000000;
   --color-tech_purpel: #6e2594;
   --color-tech_light_green: #3b9c3c;
   --color-tech_dark_red: #f02757;
@@ -96,6 +101,8 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
+
+
 @layer base {
   *,
   ::after,
@@ -161,12 +168,13 @@
     --chart-5: 340 75% 55%;
   }
 }
-@layer utilities {
+@layer base {
   :root {
-    --font-trebuchet: "Trebuchet MS", sans-serif;
+    --font-poppins: 'Poppins', sans-serif;
   }
+
   body {
-    font-family: var(--font-trebuchet);
+    font-family: var(--font-poppins);
   }
 }
 @layer base {

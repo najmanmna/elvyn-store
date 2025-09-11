@@ -4,20 +4,29 @@ import { persist } from "zustand/middleware";
 
 export interface CartItem {
   product: Product;
+  variant?: {
+    id: string;
+    color?: string;
+    stock?: number;
+    images?: any[];
+  };
+
+  itemKey: string; // unique identifier for product+variant
   quantity: number;
 }
 
 interface StoreState {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  deleteCartProduct: (productId: string) => void;
+  addItem: (product: Product, variant?: { id: string; color?: string }) => void;
+  removeItem: (itemKey: string) => void;
+  deleteCartProduct: (itemKey: string) => void;
   resetCart: () => void;
   getTotalPrice: () => number;
   getSubTotalPrice: () => number;
-  getItemCount: (productId: string) => number;
+  getItemCount: (itemKey: string) => number;
   getGroupedItems: () => CartItem[];
-  // favorite
+
+  // favorites
   favoriteProduct: Product[];
   addToFavorite: (product: Product) => Promise<void>;
   removeFromFavorite: (productId: string) => void;
@@ -29,27 +38,36 @@ const useCartStore = create<StoreState>()(
     (set, get) => ({
       items: [],
       favoriteProduct: [],
-      addItem: (product) =>
+
+      // ✅ add product by unique itemKey
+      addItem: (product, variant) =>
         set((state) => {
-          const existingItem = state.items.find(
-            (item) => item.product._id === product._id
-          );
+          const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
+          const existingItem = state.items.find((item) => item.itemKey === itemKey);
+
           if (existingItem) {
             return {
               items: state.items.map((item) =>
-                item.product._id === product._id
+                item.itemKey === itemKey
                   ? { ...item, quantity: item.quantity + 1 }
                   : item
               ),
             };
           } else {
-            return { items: [...state.items, { product, quantity: 1 }] };
+            return {
+              items: [
+                ...state.items,
+                { product, variant, itemKey, quantity: 1 },
+              ],
+            };
           }
         }),
-      removeItem: (productId) =>
+
+      // ✅ remove 1 from itemKey
+      removeItem: (itemKey) =>
         set((state) => ({
           items: state.items.reduce((acc, item) => {
-            if (item.product._id === productId) {
+            if (item.itemKey === itemKey) {
               if (item.quantity > 1) {
                 acc.push({ ...item, quantity: item.quantity - 1 });
               }
@@ -59,32 +77,40 @@ const useCartStore = create<StoreState>()(
             return acc;
           }, [] as CartItem[]),
         })),
-      deleteCartProduct: (productId) =>
+
+      // ✅ delete whole itemKey from cart
+      deleteCartProduct: (itemKey) =>
         set((state) => ({
-          items: state.items.filter(
-            ({ product }) => product?._id !== productId
-          ),
+          items: state.items.filter((item) => item.itemKey !== itemKey),
         })),
+
       resetCart: () => set({ items: [] }),
+
       getTotalPrice: () => {
         return get().items.reduce(
           (total, item) => total + (item.product.price ?? 0) * item.quantity,
           0
         );
       },
+
       getSubTotalPrice: () => {
         return get().items.reduce((total, item) => {
           const price = item.product.price ?? 0;
           const discount = ((item.product.discount ?? 0) * price) / 100;
-          const discountedPrice = price + discount;
+          const discountedPrice = price - discount;
           return total + discountedPrice * item.quantity;
         }, 0);
       },
-      getItemCount: (productId) => {
-        const item = get().items.find((item) => item.product._id === productId);
+
+      // ✅ get count by itemKey
+      getItemCount: (itemKey) => {
+        const item = get().items.find((item) => item.itemKey === itemKey);
         return item ? item.quantity : 0;
       },
+
       getGroupedItems: () => get().items,
+
+      // ✅ favorites unchanged
       addToFavorite: (product: Product) => {
         return new Promise<void>((resolve) => {
           set((state: StoreState) => {
@@ -102,13 +128,15 @@ const useCartStore = create<StoreState>()(
           resolve();
         });
       },
+
       removeFromFavorite: (productId: string) => {
         set((state: StoreState) => ({
           favoriteProduct: state.favoriteProduct.filter(
-            (item) => item?._id !== productId
+            (item) => item._id !== productId
           ),
         }));
       },
+
       resetFavorite: () => {
         set({ favoriteProduct: [] });
       },

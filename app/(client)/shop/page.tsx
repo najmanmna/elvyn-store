@@ -1,14 +1,17 @@
-import Shop from "@/components/shopPage/Shop";
-import { getAllBrands, getCategories } from "@/sanity/queries";
+import React from "react";
+import Container from "@/components/Container";
+import Title from "@/components/Title";
+import AllProductsGrid from "@/components/AllProductsGrid";
 
-const ShopPage = async () => {
-  const categories = await getCategories();
-  const brands = await getAllBrands();
+const ProductsPage = () => {
   return (
-    <div className="bg-tech_bg_color pb-10">
-      <Shop categories={categories} brands={brands} />
-    </div>
+    <Container className="py-10">
+      <Title className="text-3xl font-bold mb-8 text-center">
+        All Products
+      </Title>
+      <AllProductsGrid />
+    </Container>
   );
 };
 
-export default ShopPage;
+export default ProductsPage;

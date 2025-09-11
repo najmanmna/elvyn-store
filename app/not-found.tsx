@@ -1,5 +1,5 @@
 import GoBack from "@/components/GoBack";
-import Logo from "@/components/Logo";
+import Logo from "@/components/LogoWhite";
 import Link from "next/link";
 import React from "react";
 

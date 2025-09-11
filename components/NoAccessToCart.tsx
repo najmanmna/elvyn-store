@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import Logo from "./Logo";
+import Logo from "./LogoWhite";
 
 const NoAccessToCart = ({ details }: { details?: string }) => {
   return (

@@ -1,9 +1,11 @@
 export const headerData = [
   { title: "Home", href: "/" },
-  { title: "Shop", href: "/shop" },
-  { title: "Blog", href: "/blog" },
+  { title: "Categories", href: "/categories" },
+  { title: "New Arrivals", href: "/blog" },
   // { title: "Contact", href: "/contact" },
-  { title: "Hot Deal", href: "/deal" },
+    { title: "Hot Selling", href: "/deal" },
+
+  { title: "Best Deals", href: "/deal" },
 ];
 
 export const productType = [
@@ -15,20 +17,21 @@ export const productType = [
 
 export const quickLinksData = [
   { title: "About us", href: "/about" },
-  { title: "Contact us", href: "/contact" },
+    { title: "Our Mission", href: "/mission" },
+  // { title: "Contact us", href: "/contact" },
+    { title: "Refund & Return Policy", href: "/privacy" },
   { title: "Terms & Conditions", href: "/terms" },
-  { title: "Privacy Policy", href: "/privacy" },
-  { title: "FAQs", href: "/faqs" },
-  { title: "Help", href: "/help" },
+
+  // { title: "FAQs", href: "/faqs" },
+  // { title: "Help", href: "/help" },
 ];
 export const categoriesData = [
-  { title: "Mobiles", href: "mobiles" },
-  { title: "Appliances", href: "appliances" },
-  { title: "Smartphones", href: "smartphones" },
-  { title: "Air Conditioners", href: "air-conditioners" },
-  { title: "Washing Machine", href: "washing-machine" },
-  { title: "Kitchen Appliances", href: "kitchen-appliances" },
-  { title: "gadget accessories", href: "gadget-accessories" },
+  { title: "Tote Bags", href: "tote" },
+  { title: "Shoulder Bags", href: "shoulder" },
+  { title: "Cross Body Bags", href: "crossbody" },
+  { title: "Clutches", href: "clutches" },
+  { title: "Top Handle", href: "tophandle" },
+
 ];
 export const faqsData = [
   {

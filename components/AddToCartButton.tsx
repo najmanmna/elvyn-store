@@ -7,39 +7,56 @@ import QuantityButtons from "./QuantityButtons";
 import { cn } from "@/lib/utils";
 import { ShoppingCart } from "lucide-react";
 
+interface VariantShape {
+  id: string;
+  color?: string;
+  stock?: number;
+  images?: any[];
+}
+
 interface Props {
   product: Product;
   className?: string;
+  variant?: VariantShape;
+  displayMode?: "default" | "overlay";
 }
 
-const AddToCartButton = ({ product, className }: Props) => {
+const AddToCartButton = ({ product, className, variant, displayMode = "default" }: Props) => {
   const { addItem, getItemCount } = useCartStore();
-  const itemCount = getItemCount(product?._id);
-  const isOutOfStock = product?.stock === 0;
+
+  const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
+  const itemCount = getItemCount(itemKey);
+  const stockAvailable = variant?.stock ?? (product as any)?.stock ?? 0;
+  const isOutOfStock = stockAvailable === 0;
 
   const handleAddToCart = () => {
-    if ((product?.stock as number) > itemCount) {
-      addItem(product);
+    if (stockAvailable > itemCount) {
+      // pass full variant so cart has images & stock as well
+      addItem(product, variant ? { id: variant.id, color: variant.color } : undefined);
       toast.success(
-        `${product?.name?.substring(0, 12)}... added successfully!`
+        `${product?.name?.substring(0, 40)}${product?.name && product.name.length > 40 ? "..." : ""} ${variant?.color ? `(${variant.color})` : ""} added!`
       );
     } else {
-      toast.error("Can not add more than available stock");
+      toast.error("Cannot add more than available stock");
     }
   };
+
+  const textColor = displayMode === "overlay" ? "text-white" : "text-tech_dark/80";
+  const amountColor = displayMode === "overlay" ? "text-white" : "text-tech_dark";
+
   return (
     <div className="w-full h-12 flex items-center">
       {itemCount ? (
-        <div className="text-sm w-full">
+        <div className={cn("text-sm w-full", textColor)}>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-tech_dark/80">Quantity</span>
-            <QuantityButtons product={product} />
+            <span className="text-xs">Quantity</span>
+            {/* pass itemKey so QuantityButtons knows which cart item to modify */}
+            <QuantityButtons itemKey={itemKey} product={product} variant={variant} displayMode={displayMode} />
           </div>
+
           <div className="flex items-center justify-between border-t pt-1">
             <span className="text-xs font-semibold">Subtotal</span>
-            <PriceFormatter
-              amount={product?.price ? product.price * itemCount : 0}
-            />
+            <PriceFormatter amount={product?.price ? product.price * itemCount : 0} className={amountColor} />
           </div>
         </div>
       ) : (

@@ -38,3 +38,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ignore environment files
+.env
+.env.local
+
+# Optional: ignore all env files except example
+.env.*
+!.env.example

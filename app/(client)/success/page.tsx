@@ -16,7 +16,6 @@ import Link from "next/link";
 import { MY_ORDERS_QUERYResult } from "@/sanity.types";
 import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
-import { useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 
 const SuccessPage = () => {
