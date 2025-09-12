@@ -6,14 +6,14 @@ import useCartStore from "@/store";
 import QuantityButtons from "./QuantityButtons";
 import { cn } from "@/lib/utils";
 import { ShoppingCart } from "lucide-react";
+import type { SanityImage } from "@/types/sanity-helpers";
 
 interface VariantShape {
   id: string;
   color?: string;
   stock?: number;
-  images?: any[];
+  images?: SanityImage[];
 }
-
 interface Props {
   product: Product;
   className?: string;
@@ -21,7 +21,12 @@ interface Props {
   displayMode?: "default" | "overlay";
 }
 
-const AddToCartButton = ({ product, className, variant, displayMode = "default" }: Props) => {
+const AddToCartButton = ({
+  product,
+  className,
+  variant,
+  displayMode = "default",
+}: Props) => {
   const { addItem, getItemCount } = useCartStore();
 
   const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
@@ -32,7 +37,18 @@ const AddToCartButton = ({ product, className, variant, displayMode = "default" 
   const handleAddToCart = () => {
     if (stockAvailable > itemCount) {
       // pass full variant so cart has images & stock as well
-      addItem(product, variant ? { id: variant.id, color: variant.color } : undefined);
+      addItem(
+        product,
+        variant
+          ? {
+              id: variant.id,
+              color: variant.color,
+              images: variant.images,
+              stock: variant.stock, // ✅ add this line
+            }
+          : undefined
+      );
+
       toast.success(
         `${product?.name?.substring(0, 40)}${product?.name && product.name.length > 40 ? "..." : ""} ${variant?.color ? `(${variant.color})` : ""} added!`
       );
@@ -41,8 +57,10 @@ const AddToCartButton = ({ product, className, variant, displayMode = "default" 
     }
   };
 
-  const textColor = displayMode === "overlay" ? "text-white" : "text-tech_dark/80";
-  const amountColor = displayMode === "overlay" ? "text-white" : "text-tech_dark";
+  const textColor =
+    displayMode === "overlay" ? "text-white" : "text-tech_dark/80";
+  const amountColor =
+    displayMode === "overlay" ? "text-white" : "text-tech_dark";
 
   return (
     <div className="w-full h-12 flex items-center">
@@ -51,12 +69,20 @@ const AddToCartButton = ({ product, className, variant, displayMode = "default" 
           <div className="flex items-center justify-between">
             <span className="text-xs">Quantity</span>
             {/* pass itemKey so QuantityButtons knows which cart item to modify */}
-            <QuantityButtons itemKey={itemKey} product={product} variant={variant} displayMode={displayMode} />
+            <QuantityButtons
+              itemKey={itemKey}
+              product={product}
+              variant={variant}
+              displayMode={displayMode}
+            />
           </div>
 
           <div className="flex items-center justify-between border-t pt-1">
             <span className="text-xs font-semibold">Subtotal</span>
-            <PriceFormatter amount={product?.price ? product.price * itemCount : 0} className={amountColor} />
+            <PriceFormatter
+              amount={product?.price ? product.price * itemCount : 0}
+              className={amountColor}
+            />
           </div>
         </div>
       ) : (

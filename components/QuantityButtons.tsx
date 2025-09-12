@@ -1,21 +1,28 @@
+// src/components/QuantityButtons.tsx
 "use client";
 import React from "react";
 import { Button } from "./ui/button";
 import { HiMinus, HiPlus } from "react-icons/hi2";
 import toast from "react-hot-toast";
 import useCartStore from "@/store";
-import { Product } from "@/sanity.types";
+import type { Product } from "@/sanity.types";
 import { twMerge } from "tailwind-merge";
+
+interface VariantShape {
+  id: string;
+  color?: string;
+  stock?: number;
+  images?: any[];
+}
 
 interface Props {
   product: Product;
-  itemKey: string; // 🔑 unique identifier passed from AddToCartButton / CartPage
+  itemKey?: string;
   className?: string;
   borderStyle?: string;
-  variant?: { id: string; color?: string; stock?: number; images?: any[] }; // ✅ normalized
+  variant?: VariantShape;
   displayMode?: "default" | "overlay";
 }
-
 
 const QuantityButtons = ({
   product,
@@ -25,14 +32,42 @@ const QuantityButtons = ({
   variant,
   displayMode = "default",
 }: Props) => {
-  const { addItem, removeItem, getItemCount } = useCartStore();
+  // hydration flag
+  const [hydrated, setHydrated] = React.useState(false);
+  React.useEffect(() => {
+    const unsub = useCartStore.persist.onFinishHydration(() =>
+      setHydrated(true)
+    );
+    setHydrated(useCartStore.persist.hasHydrated?.() ?? false);
+    return () => unsub?.();
+  }, []);
 
-  const itemCount = getItemCount(itemKey);
-  const stockAvailable = variant ? variant.stock ?? 0 : product.stock ?? 0;
-  const isOutOfStock = stockAvailable === 0;
+  // compute itemKey
+  const computedItemKey =
+    itemKey ?? (variant ? `${product._id}-${variant.id}` : product._id);
 
-  const handleRemoveProduct = () => {
-    removeItem(itemKey);
+  // subscribe to cart state
+  const cartItem = useCartStore((s) =>
+    s.items.find((i) => i.itemKey === computedItemKey)
+  );
+  const itemCount = cartItem ? cartItem.quantity : 0;
+
+  // actions
+  const addItem = useCartStore((s) => s.addItem);
+  const increaseQuantity = useCartStore((s) => s.increaseQuantity);
+  const decreaseQuantity = useCartStore((s) => s.decreaseQuantity);
+
+  // determine available stock
+  const stockAvailable = variant?.stock ?? (product as any)?.stock ?? 0;
+
+  const isOutOfStock = stockAvailable <= 0;
+  const canIncrease = itemCount < stockAvailable;
+
+  const handleRemove = () => {
+    if (itemCount <= 0) return;
+
+    decreaseQuantity(computedItemKey);
+
     if (itemCount > 1) {
       toast.success("Quantity decreased successfully!");
     } else {
@@ -44,19 +79,33 @@ const QuantityButtons = ({
     }
   };
 
-  const handleAddToCart = () => {
-    if (stockAvailable > itemCount) {
+  const handleAdd = () => {
+    if (!canIncrease) {
+      toast.error("Cannot add more than available stock");
+      return;
+    }
+
+    if (itemCount === 0) {
+      // add fresh item with stock info
       addItem(
         product,
-        variant ? { id: variant.id, color: variant.color } : undefined
+        variant
+          ? {
+              id: variant.id,
+              color: variant.color,
+              stock: variant.stock,
+              images: variant.images,
+            }
+          : undefined
       );
-      toast.success("Quantity increased successfully!");
     } else {
-      toast.error("Cannot add more than available stock");
+      increaseQuantity(computedItemKey);
     }
+
+    toast.success("Quantity increased successfully!");
   };
 
-  // 🎨 styling based on displayMode
+  // styles
   const buttonClasses =
     displayMode === "overlay"
       ? "w-6 h-6 border-0 bg-black text-white hover:bg-black/80 hover:cursor-pointer"
@@ -66,6 +115,10 @@ const QuantityButtons = ({
     displayMode === "overlay"
       ? "font-semibold text-sm w-6 text-center text-white"
       : "font-semibold text-sm w-6 text-center text-tech_dark";
+
+  if (!hydrated) {
+    return <span className={countClasses}>0</span>;
+  }
 
   return (
     <div
@@ -78,19 +131,21 @@ const QuantityButtons = ({
       <Button
         variant="outline"
         size="icon"
-        className={buttonClasses}
-        onClick={handleRemoveProduct}
+        className={twMerge(buttonClasses, "z-50 relative pointer-events-auto")}
+        onClick={handleRemove}
         disabled={itemCount === 0 || isOutOfStock}
       >
         <HiMinus />
       </Button>
+
       <span className={countClasses}>{itemCount}</span>
+
       <Button
         variant="outline"
         size="icon"
-        className={buttonClasses}
-        onClick={handleAddToCart}
-        disabled={isOutOfStock}
+        className={twMerge(buttonClasses, "z-50 relative pointer-events-auto")}
+        onClick={handleAdd}
+        disabled={isOutOfStock || !canIncrease}
       >
         <HiPlus />
       </Button>

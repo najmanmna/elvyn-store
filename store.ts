@@ -1,30 +1,41 @@
-import { Product } from "./sanity.types";
+// src/store/index.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Product } from "@/sanity.types";
+import type { SanityImage } from "@/types/sanity-helpers";
+
+export interface CartVariant {
+  id: string;
+  color?: string;
+  stock?: number;
+  images?: SanityImage[];
+}
 
 export interface CartItem {
   product: Product;
-  variant?: {
-    id: string;
-    color?: string;
-    stock?: number;
-    images?: any[];
-  };
-
-  itemKey: string; // unique identifier for product+variant
+  variant?: CartVariant;
+  itemKey: string;
   quantity: number;
 }
 
 interface StoreState {
   items: CartItem[];
-  addItem: (product: Product, variant?: { id: string; color?: string }) => void;
-  removeItem: (itemKey: string) => void;
-  deleteCartProduct: (itemKey: string) => void;
+  addItem: (product: Product, variant?: CartVariant) => void;
+  removeItem: (itemKey: string) => void; // remove one unit
+  deleteCartProduct: (itemKey: string) => void; // remove entire line
   resetCart: () => void;
+
+  // derived helpers
+  getItemCount: (itemKey: string) => number;
   getTotalPrice: () => number;
   getSubTotalPrice: () => number;
-  getItemCount: (itemKey: string) => number;
-  getGroupedItems: () => CartItem[];
+
+  // convenience wrappers
+  increaseQuantity: (itemKey: string) => void;
+  decreaseQuantity: (itemKey: string) => void;
+
+  // 🔹 NEW: update variant data (e.g., stock, images)
+  updateItemVariant: (itemKey: string, variant: Partial<CartVariant>) => void;
 
   // favorites
   favoriteProduct: Product[];
@@ -39,107 +50,97 @@ const useCartStore = create<StoreState>()(
       items: [],
       favoriteProduct: [],
 
-      // ✅ add product by unique itemKey
+      // add item (increment if exists)
       addItem: (product, variant) =>
         set((state) => {
           const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
-          const existingItem = state.items.find((item) => item.itemKey === itemKey);
-
-          if (existingItem) {
+          const existing = state.items.find((i) => i.itemKey === itemKey);
+          if (existing) {
             return {
-              items: state.items.map((item) =>
-                item.itemKey === itemKey
-                  ? { ...item, quantity: item.quantity + 1 }
-                  : item
+              items: state.items.map((i) =>
+                i.itemKey === itemKey ? { ...i, quantity: i.quantity + 1 } : i
               ),
             };
           } else {
             return {
-              items: [
-                ...state.items,
-                { product, variant, itemKey, quantity: 1 },
-              ],
+              items: [...state.items, { product, variant, itemKey, quantity: 1 }],
             };
           }
         }),
 
-      // ✅ remove 1 from itemKey
+      // remove one unit
       removeItem: (itemKey) =>
         set((state) => ({
-          items: state.items.reduce((acc, item) => {
-            if (item.itemKey === itemKey) {
-              if (item.quantity > 1) {
-                acc.push({ ...item, quantity: item.quantity - 1 });
-              }
-            } else {
-              acc.push(item);
-            }
-            return acc;
-          }, [] as CartItem[]),
+          items: state.items
+            .map((i) =>
+              i.itemKey === itemKey ? { ...i, quantity: Math.max(0, i.quantity - 1) } : i
+            )
+            .filter((i) => i.quantity > 0),
         })),
 
-      // ✅ delete whole itemKey from cart
+      // delete entire product line
       deleteCartProduct: (itemKey) =>
         set((state) => ({
-          items: state.items.filter((item) => item.itemKey !== itemKey),
+          items: state.items.filter((i) => i.itemKey !== itemKey),
         })),
 
       resetCart: () => set({ items: [] }),
 
-      getTotalPrice: () => {
-        return get().items.reduce(
-          (total, item) => total + (item.product.price ?? 0) * item.quantity,
-          0
-        );
-      },
-
-      getSubTotalPrice: () => {
-        return get().items.reduce((total, item) => {
-          const price = item.product.price ?? 0;
-          const discount = ((item.product.discount ?? 0) * price) / 100;
-          const discountedPrice = price - discount;
-          return total + discountedPrice * item.quantity;
-        }, 0);
-      },
-
-      // ✅ get count by itemKey
       getItemCount: (itemKey) => {
-        const item = get().items.find((item) => item.itemKey === itemKey);
+        const item = get().items.find((i) => i.itemKey === itemKey);
         return item ? item.quantity : 0;
       },
 
-      getGroupedItems: () => get().items,
+      getTotalPrice: () =>
+        get().items.reduce((t, item) => t + (item.product.price ?? 0) * item.quantity, 0),
 
-      // ✅ favorites unchanged
-      addToFavorite: (product: Product) => {
-        return new Promise<void>((resolve) => {
-          set((state: StoreState) => {
-            const isFavorite = state.favoriteProduct.some(
-              (item) => item._id === product._id
-            );
+      getSubTotalPrice: () =>
+        get().items.reduce((t, item) => {
+          const price = item.product.price ?? 0;
+          const discount = ((item.product.discount ?? 0) * price) / 100;
+          const discounted = price - discount;
+          return t + discounted * item.quantity;
+        }, 0),
+
+      increaseQuantity: (itemKey) => {
+        const found = get().items.find((i) => i.itemKey === itemKey);
+        if (found) {
+          get().addItem(found.product, found.variant);
+        }
+      },
+
+      decreaseQuantity: (itemKey) => {
+        get().removeItem(itemKey);
+      },
+
+      // 🔹 update variant details (e.g. fresh stock from Sanity)
+      updateItemVariant: (itemKey, variant) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.itemKey === itemKey ? { ...i, variant: { ...i.variant, ...variant } } : i
+          ),
+        })),
+
+      // favorites
+      addToFavorite: (product) =>
+        new Promise<void>((resolve) => {
+          set((state) => {
+            const exists = state.favoriteProduct.some((p) => p._id === product._id);
             return {
-              favoriteProduct: isFavorite
-                ? state.favoriteProduct.filter(
-                    (item) => item._id !== product._id
-                  )
+              favoriteProduct: exists
+                ? state.favoriteProduct.filter((p) => p._id !== product._id)
                 : [...state.favoriteProduct, { ...product }],
             };
           });
           resolve();
-        });
-      },
+        }),
 
-      removeFromFavorite: (productId: string) => {
-        set((state: StoreState) => ({
-          favoriteProduct: state.favoriteProduct.filter(
-            (item) => item._id !== productId
-          ),
-        }));
-      },
+      removeFromFavorite: (productId) =>
+        set((state) => ({
+          favoriteProduct: state.favoriteProduct.filter((p) => p._id !== productId),
+        })),
 
-      resetFavorite: () => {
-        set({ favoriteProduct: [] });
-      },
+      resetFavorite: () => set({ favoriteProduct: [] }),
     }),
     { name: "cart-store" }
   )
