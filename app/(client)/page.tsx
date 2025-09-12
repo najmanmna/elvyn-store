@@ -1,4 +1,3 @@
-import HomeCategories from "@/components/HomeCategories";
 
 import HomeBanner from "@/components/HomeBanner";
 import ProductGrid from "@/components/ProductGrid";
@@ -9,7 +8,6 @@ import InstagramElfsight from "@/components/InstagramFeed";
 import FooterTop from "@/components/common/FooterTop";
 
 export default async function Home() {
-  const categories = await getCategories();
 
   return (
     <div className="bg-tech_bg_color pb-16">
@@ -18,7 +16,6 @@ export default async function Home() {
       <div className="py-10">
         <ProductGrid />
       </div>
-      {/* <HomeCategories categories={categories} /> */}
 
       <ProductStatusSelector />
       <InstagramElfsight />

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 const PrivacyPage = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
+      {/* <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
       <div className="space-y-4">
         <section>
           <h2 className="text-xl font-semibold mb-2">
@@ -45,7 +45,7 @@ const PrivacyPage = () => {
             information. Please contact us for assistance with these requests.
           </p>
         </section>
-      </div>
+      </div> */}
     </div>
   );
 };

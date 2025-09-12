@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Logo from "../LogoWhite";
 import SocialMedia from "../SocialMedia";
-import { categoriesData, quickLinksData } from "@/constants";
-import { Mail, MessageCircle } from "lucide-react";
+import { quickLinksData } from "@/constants";
+import { Mail } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {

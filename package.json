@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typegen": "npx sanity@latest schema extract && npx sanity@latest typegen generate",
-    "deploy": "wrangler pages publish .next --project-name=shoptech"
+    "deploy": "wrangler pages publish .next --project-name=shoptech",
+      "build:skip-types": "NEXT_DISABLE_TYPECHECK=true next build",
+        "build:skip-lint": "next build --no-lint"
   },
   "dependencies": {
     "@cloudflare/next-on-pages": "^1.13.12",

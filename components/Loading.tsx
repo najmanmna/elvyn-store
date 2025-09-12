@@ -1,5 +1,4 @@
 "use client";
-import Logo from "./LogoWhite";
 import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 

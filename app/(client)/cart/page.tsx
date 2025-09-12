@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Container from "@/components/Container";
-import { Input } from "@/components/ui/input";
 
 const CartPage = () => {
   const items = useCartStore((s) => s.items);
@@ -29,8 +28,6 @@ const CartPage = () => {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ADDRESS_QUERYResult | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [couponCode, setCouponCode] = useState("");
-  const [voucherCode, setVoucherCode] = useState("");
 
   // 🔹 refresh stock on mount
   useEffect(() => {
@@ -273,11 +270,8 @@ const CartPage = () => {
               })}
             </div>
 
-            {/* coupon / summary ... unchanged */}
-            {/* coupon / summary */}
             <div className="grid md:grid-cols-3 gap-6 mt-6">
               <div className="md:col-span-2 space-y-4">
-               
                 <div className="flex flex-col sm:flex-row gap-3 mt-6">
                   <Link href="/" className="flex-1">
                     <Button

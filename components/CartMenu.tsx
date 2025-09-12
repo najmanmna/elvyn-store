@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Handbag} from "lucide-react";
+
 import Link from "next/link";
 import useCartStore from "@/store";
 import { BsHandbag } from "react-icons/bs";

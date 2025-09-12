@@ -1,5 +1,4 @@
 // HomeBanner.tsx (Server Component)
-import Container from "./Container";
 import { getBanner } from "@/sanity/queries";
 import CarouselWithDots from "./CarouselWithDots"; // client component
 

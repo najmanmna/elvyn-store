@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import AddToCartButton from "@/components/AddToCartButton";
 import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
-import { CornerDownLeft, Truck } from "lucide-react";
+
 import Container from "@/components/Container";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
