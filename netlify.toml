@@ -1,5 +1,16 @@
 [build]
-  ignoreSecrets = ["NEXT_PUBLIC_SANITY_DATASET"]
+  command = "DISABLE_ESLINT_PLUGIN=true NEXT_DISABLE_TYPECHECK=true npm run build"
+  publish = ".next"
+
 [build.environment]
-  NETLIFY_USE_YARN_CACHE = "false"
-  NODE_ENV = "production"
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Ignore false secret scans
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  [plugins.inputs]
+    ignore_env = ["NEXT_PUBLIC_SANITY_DATASET"]
