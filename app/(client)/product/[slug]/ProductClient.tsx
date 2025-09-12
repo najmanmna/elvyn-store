@@ -5,6 +5,8 @@ import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import { CornerDownLeft, Truck } from "lucide-react";
 import Container from "@/components/Container";
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
 
 export default function ProductClient({ product }: { product: any }) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -18,7 +20,7 @@ export default function ProductClient({ product }: { product: any }) {
     images: rawVariant.images ?? [],
   };
 
-  // ✅ variant images first, fallback to product images if needed
+  // ✅ images for ImageView
   const images =
     selectedVariant.images?.length > 0
       ? selectedVariant.images
@@ -31,7 +33,7 @@ export default function ProductClient({ product }: { product: any }) {
     <div className="bg-tech_white py-10">
       <Container>
         <div className="flex flex-col md:flex-row gap-10">
-          {/* Product Images */}
+          {/* Product Images (main gallery) */}
           {images.length > 0 && (
             <ImageView images={images} isStock={selectedVariant.stock} />
           )}
@@ -51,36 +53,69 @@ export default function ProductClient({ product }: { product: any }) {
               <p className="text-2xl font-bold">{product?.name}</p>
             </div>
 
+            {/* Price */}
             <PriceView
               price={product?.price}
               discount={product?.discount}
               className="text-lg font-bold"
             />
 
+            {/* Delivery Time */}
+            <p className="text-sm text-gray-600">Delivery Time: 3-5 Working Days</p>
+
             {/* Colors */}
             {product?.variants?.length > 0 && (
-              <div className="flex items-center gap-3">
-                <p className="text-sm font-semibold">Colors:</p>
-                {product.variants.map((v: any, idx: number) => (
-                  <button
-                    key={v._key ?? idx}
-                    className={`px-3 py-1 rounded border ${
-                      idx === selectedVariantIndex
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
-                    }`}
-                    onClick={() => setSelectedVariantIndex(idx)}
-                  >
-                    {v.colorName ?? v.color ?? `Option ${idx + 1}`}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <p className="text-sm font-semibold">Colors:</p>
+                  {product.variants.map((v: any, idx: number) => (
+                    <button
+                      key={v._key ?? idx}
+                      className={`px-3 py-1 rounded border ${
+                        idx === selectedVariantIndex
+                          ? "bg-black text-white"
+                          : "bg-white text-black"
+                      }`}
+                      onClick={() => setSelectedVariantIndex(idx)}
+                    >
+                      {v.colorName ?? v.color ?? `Option ${idx + 1}`}
+                    </button>
+                  ))}
+                </div>
+
+              {/* Variant image previews under colors */}
+<div className="flex gap-2 mt-2">
+  {product.variants.map((v: any, idx: number) => {
+    const preview = v.images?.[0];
+    if (!preview) return null;
+
+    return (
+      <button
+        key={v._key ?? idx}
+        onClick={() => setSelectedVariantIndex(idx)}
+        className={`w-16 h-16 border rounded overflow-hidden ${
+          idx === selectedVariantIndex ? "ring-2 ring-tech_orange" : ""
+        }`}
+      >
+        <Image
+          src={urlFor(preview).url()}
+          alt={v.colorName ?? v.color ?? `Variant ${idx + 1}`}
+          width={64}
+          height={64}
+          className="object-contain w-full h-full"
+        />
+      </button>
+    );
+  })}
+</div>
+
               </div>
             )}
 
             {/* Add to Cart + Buy Now */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-1/2">
               <AddToCartButton
-                key={itemKey} // ✅ remount when variant changes
+                key={itemKey}
                 product={product}
                 variant={selectedVariant}
               />
@@ -89,32 +124,7 @@ export default function ProductClient({ product }: { product: any }) {
               </button>
             </div>
 
-            {/* Delivery Info */}
-            <div className="flex flex-col gap-2">
-              <div className="border border-gray-200 p-3 flex items-center gap-3">
-                <Truck size={30} className="text-tech_orange" />
-                <div>
-                  <p className="text-base font-semibold text-black">
-                    Free Delivery
-                  </p>
-                  <p className="text-sm text-gray-500 underline underline-offset-2">
-                    Enter your Postal code for Delivery Availability.
-                  </p>
-                </div>
-              </div>
-              <div className="border border-gray-200 p-3 flex items-center gap-3">
-                <CornerDownLeft size={30} className="text-tech_orange" />
-                <div>
-                  <p className="text-base font-semibold text-black">
-                    Return Delivery
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Free 30 days Delivery Returns.{" "}
-                    <span className="underline">Details</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+         
           </div>
         </div>
       </Container>

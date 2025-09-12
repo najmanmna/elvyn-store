@@ -277,58 +277,7 @@ const CartPage = () => {
             {/* coupon / summary */}
             <div className="grid md:grid-cols-3 gap-6 mt-6">
               <div className="md:col-span-2 space-y-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Apply Coupon Code</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                      />
-                      <Button
-                        onClick={() => {
-                          if (!couponCode.trim()) {
-                            toast.error("Enter coupon");
-                            return;
-                          }
-                          toast.success("Coupon applied");
-                        }}
-                      >
-                        Apply Coupon
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Apply Voucher</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter voucher code"
-                        value={voucherCode}
-                        onChange={(e) => setVoucherCode(e.target.value)}
-                      />
-                      <Button
-                        onClick={() => {
-                          if (!voucherCode.trim()) {
-                            toast.error("Enter voucher");
-                            return;
-                          }
-                          toast.success("Voucher applied");
-                        }}
-                      >
-                        Apply Voucher
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
+               
                 <div className="flex flex-col sm:flex-row gap-3 mt-6">
                   <Link href="/" className="flex-1">
                     <Button
