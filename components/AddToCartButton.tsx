@@ -17,7 +17,7 @@ interface VariantShape {
 interface Props {
   product: Product;
   className?: string;
-  variant?: VariantShape;
+  variant: VariantShape; // 🔹 make required since schema requires variant
   displayMode?: "default" | "overlay";
 }
 
@@ -29,28 +29,26 @@ const AddToCartButton = ({
 }: Props) => {
   const { addItem, getItemCount } = useCartStore();
 
-  const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
+  // ✅ Always build itemKey with variant
+  const itemKey = `${product._id}-${variant.id}`;
   const itemCount = getItemCount(itemKey);
-  const stockAvailable = variant?.stock ?? (product as any)?.stock ?? 0;
+
+  const stockAvailable = variant.stock ?? 0;
   const isOutOfStock = stockAvailable === 0;
 
   const handleAddToCart = () => {
     if (stockAvailable > itemCount) {
-      // pass full variant so cart has images & stock as well
-      addItem(
-        product,
-        variant
-          ? {
-              id: variant.id,
-              color: variant.color,
-              images: variant.images,
-              stock: variant.stock, // ✅ add this line
-            }
-          : undefined
-      );
+      addItem(product, {
+        id: variant.id,
+        color: variant.color,
+        images: variant.images,
+        stock: variant.stock,
+      });
 
       toast.success(
-        `${product?.name?.substring(0, 40)}${product?.name && product.name.length > 40 ? "..." : ""} ${variant?.color ? `(${variant.color})` : ""} added!`
+        `${product?.name?.substring(0, 40)}${
+          product?.name && product.name.length > 40 ? "..." : ""
+        } (${variant?.color ?? "default"}) added!`
       );
     } else {
       toast.error("Cannot add more than available stock");
@@ -68,11 +66,10 @@ const AddToCartButton = ({
         <div className={cn("text-sm w-full", textColor)}>
           <div className="flex items-center justify-between">
             <span className="text-xs">Quantity</span>
-            {/* pass itemKey so QuantityButtons knows which cart item to modify */}
             <QuantityButtons
               itemKey={itemKey}
               product={product}
-              variant={variant}
+              variant={variant} // ✅ always pass variant
               displayMode={displayMode}
             />
           </div>

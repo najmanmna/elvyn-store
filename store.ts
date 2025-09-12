@@ -13,14 +13,14 @@ export interface CartVariant {
 
 export interface CartItem {
   product: Product;
-  variant?: CartVariant;
+  variant: CartVariant;
   itemKey: string;
   quantity: number;
 }
 
 interface StoreState {
   items: CartItem[];
-  addItem: (product: Product, variant?: CartVariant) => void;
+  addItem: (product: Product, variant: CartVariant) => void;
   removeItem: (itemKey: string) => void; // remove one unit
   deleteCartProduct: (itemKey: string) => void; // remove entire line
   resetCart: () => void;
@@ -51,22 +51,25 @@ const useCartStore = create<StoreState>()(
       favoriteProduct: [],
 
       // add item (increment if exists)
-      addItem: (product, variant) =>
-        set((state) => {
-          const itemKey = variant ? `${product._id}-${variant.id}` : product._id;
-          const existing = state.items.find((i) => i.itemKey === itemKey);
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
-                i.itemKey === itemKey ? { ...i, quantity: i.quantity + 1 } : i
-              ),
-            };
-          } else {
-            return {
-              items: [...state.items, { product, variant, itemKey, quantity: 1 }],
-            };
-          }
-        }),
+     addItem: (product: Product, variant: CartVariant) =>
+  set((state) => {
+    const itemKey = `${product._id}-${variant.id}`;
+    const existing = state.items.find((i) => i.itemKey === itemKey);
+
+    if (existing) {
+      return {
+        items: state.items.map((i) =>
+          i.itemKey === itemKey ? { ...i, quantity: i.quantity + 1 } : i
+        ),
+      };
+    } else {
+      return {
+        items: [...state.items, { product, variant, itemKey, quantity: 1 }],
+      };
+    }
+  }),
+
+
 
       // remove one unit
       removeItem: (itemKey) =>

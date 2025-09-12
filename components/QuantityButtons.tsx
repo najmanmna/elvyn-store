@@ -1,4 +1,3 @@
-// src/components/QuantityButtons.tsx
 "use client";
 import React from "react";
 import { Button } from "./ui/button";
@@ -6,13 +5,14 @@ import { HiMinus, HiPlus } from "react-icons/hi2";
 import toast from "react-hot-toast";
 import useCartStore from "@/store";
 import type { Product } from "@/sanity.types";
+import type { SanityImage } from "@/types/sanity-helpers";
 import { twMerge } from "tailwind-merge";
 
 interface VariantShape {
   id: string;
   color?: string;
   stock?: number;
-  images?: any[];
+  images?: SanityImage[];
 }
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
   itemKey?: string;
   className?: string;
   borderStyle?: string;
-  variant?: VariantShape;
+  variant: VariantShape; // 🔹 Required (schema enforces variant exists)
   displayMode?: "default" | "overlay";
 }
 
@@ -42,9 +42,8 @@ const QuantityButtons = ({
     return () => unsub?.();
   }, []);
 
-  // compute itemKey
-  const computedItemKey =
-    itemKey ?? (variant ? `${product._id}-${variant.id}` : product._id);
+  // ✅ always compute key with variant
+  const computedItemKey = itemKey ?? `${product._id}-${variant.id}`;
 
   // subscribe to cart state
   const cartItem = useCartStore((s) =>
@@ -57,9 +56,8 @@ const QuantityButtons = ({
   const increaseQuantity = useCartStore((s) => s.increaseQuantity);
   const decreaseQuantity = useCartStore((s) => s.decreaseQuantity);
 
-  // determine available stock
-  const stockAvailable = variant?.stock ?? (product as any)?.stock ?? 0;
-
+  // ✅ stock always comes from variant
+  const stockAvailable = variant.stock ?? 0;
   const isOutOfStock = stockAvailable <= 0;
   const canIncrease = itemCount < stockAvailable;
 
@@ -74,7 +72,7 @@ const QuantityButtons = ({
       toast.success(
         `${product?.name?.substring(0, 12)}${
           product?.name && product.name.length > 12 ? "..." : ""
-        } ${variant?.color ? `(${variant.color})` : ""} removed!`
+        } (${variant?.color ?? "default"}) removed!`
       );
     }
   };
@@ -86,18 +84,13 @@ const QuantityButtons = ({
     }
 
     if (itemCount === 0) {
-      // add fresh item with stock info
-      addItem(
-        product,
-        variant
-          ? {
-              id: variant.id,
-              color: variant.color,
-              stock: variant.stock,
-              images: variant.images,
-            }
-          : undefined
-      );
+      // add fresh item with full variant
+      addItem(product, {
+        id: variant.id,
+        color: variant.color,
+        stock: variant.stock,
+        images: variant.images,
+      });
     } else {
       increaseQuantity(computedItemKey);
     }

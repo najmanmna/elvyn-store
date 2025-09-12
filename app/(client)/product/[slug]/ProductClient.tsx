@@ -9,36 +9,31 @@ import Container from "@/components/Container";
 export default function ProductClient({ product }: { product: any }) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
 
-  const rawVariant = product?.variants?.[selectedVariantIndex];
-  const selectedVariant = rawVariant
-    ? {
-        id: rawVariant._key ?? rawVariant.id ?? String(selectedVariantIndex),
-        color: rawVariant.colorName ?? rawVariant.color ?? rawVariant.name,
-        stock: rawVariant.stock ?? 0,
-        images: rawVariant.images ?? [],
-      }
-    : undefined;
+  // ✅ always pick from variants (schema guarantees at least one)
+  const rawVariant = product.variants[selectedVariantIndex];
+  const selectedVariant = {
+    id: rawVariant._key ?? rawVariant.id ?? String(selectedVariantIndex),
+    color: rawVariant.colorName ?? rawVariant.color ?? rawVariant.name,
+    stock: rawVariant.stock ?? 0,
+    images: rawVariant.images ?? [],
+  };
 
-  // image list fallback: variant images first, then product.images
-  const images = selectedVariant?.images?.length
-    ? selectedVariant.images
-    : (product?.images ?? []);
+  // ✅ variant images first, fallback to product images if needed
+  const images =
+    selectedVariant.images?.length > 0
+      ? selectedVariant.images
+      : product.images ?? [];
 
-  // itemKey used for forcing remount and uniqueness in cart
-  const itemKey = selectedVariant
-    ? `${product._id}-${selectedVariant.id}`
-    : product._id;
+  // ✅ unique cart key
+  const itemKey = `${product._id}-${selectedVariant.id}`;
 
   return (
     <div className="bg-tech_white py-10">
       <Container>
         <div className="flex flex-col md:flex-row gap-10">
-          {/* Product Images (variant first, fallback to product images) */}
-          {images?.length > 0 && (
-            <ImageView
-              images={images}
-              isStock={selectedVariant?.stock ?? product?.stock}
-            />
+          {/* Product Images */}
+          {images.length > 0 && (
+            <ImageView images={images} isStock={selectedVariant.stock} />
           )}
 
           {/* Info */}
@@ -46,14 +41,12 @@ export default function ProductClient({ product }: { product: any }) {
             <div className="space-y-1">
               <p
                 className={`w-24 text-center text-xs py-1 font-semibold rounded-lg ${
-                  (selectedVariant?.stock ?? product?.stock ?? 0) > 0
+                  selectedVariant.stock > 0
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-600"
                 }`}
               >
-                {(selectedVariant?.stock ?? product?.stock ?? 0) > 0
-                  ? "In Stock"
-                  : "Out of Stock"}
+                {selectedVariant.stock > 0 ? "In Stock" : "Out of Stock"}
               </p>
               <p className="text-2xl font-bold">{product?.name}</p>
             </div>
@@ -84,10 +77,10 @@ export default function ProductClient({ product }: { product: any }) {
               </div>
             )}
 
+            {/* Add to Cart + Buy Now */}
             <div className="flex items-center gap-3">
-              {/* key=itemKey forces remount when variant changes so add-to-cart UI updates */}
               <AddToCartButton
-                key={itemKey}
+                key={itemKey} // ✅ remount when variant changes
                 product={product}
                 variant={selectedVariant}
               />

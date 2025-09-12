@@ -5,10 +5,18 @@ import Link from "next/link";
 import Title from "./Title";
 import { image } from "@/sanity/image";
 
-const ProductCard = ({ product }: { product: Product }) => {
-  // ✅ Collect first image from each variant
+interface VariantShape {
+  colorName?: string;
+  stock?: number;
+  images?: { asset?: { url?: string } }[];
+}
+
+const ProductCard = ({ product }: { product: Product & { variants?: VariantShape[] } }) => {
+  // ✅ Collect first image from each variant safely
   const variantImages =
-    product?.variants?.map((v) => v?.images?.[0]).filter(Boolean) || [];
+    product?.variants
+      ?.map((v) => v?.images?.[0])
+      .filter((img): img is NonNullable<typeof img> => Boolean(img)) || [];
 
   // ✅ Calculate total stock across all variants
   const totalStock =
@@ -16,6 +24,9 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   // ✅ Track hover state
   const [hovered, setHovered] = useState(false);
+
+  const primaryImage = variantImages[0];
+  const secondaryImage = variantImages[1];
 
   return (
     <div
@@ -25,13 +36,13 @@ const ProductCard = ({ product }: { product: Product }) => {
     >
       {/* Product Image */}
       <div className="relative w-full">
-        <Link href={`/product/${product?.slug?.current}`}>
-          {variantImages.length > 0 && (
+        <Link href={`/product/${product?.slug?.current || ""}`}>
+          {primaryImage && (
             <img
               src={
-                hovered && variantImages[1]
-                  ? image(variantImages[1]).size(800, 900).url()
-                  : image(variantImages[0]).size(800, 900).url()
+                hovered && secondaryImage
+                  ? image(secondaryImage).width(800).height(900).url()
+                  : image(primaryImage).width(800).height(900).url()
               }
               alt={product?.name || "productImage"}
               loading="lazy"
@@ -54,15 +65,9 @@ const ProductCard = ({ product }: { product: Product }) => {
           className="text-sm"
         />
 
-        <p
-          className={`text-sm ${
-            totalStock === 0
-              ? "text-red-600 font-semibold"
-              : "text-tech_orange/80 font-medium"
-          }`}
-        >
-          {totalStock === 0 ? "OUT OF STOCK" : ""}
-        </p>
+        {totalStock === 0 && (
+          <p className="text-sm text-red-600 font-semibold">OUT OF STOCK</p>
+        )}
       </div>
     </div>
   );
