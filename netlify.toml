@@ -1,0 +1,5 @@
+[build]
+  ignoreSecrets = ["NEXT_PUBLIC_SANITY_DATASET"]
+[build.environment]
+  NETLIFY_USE_YARN_CACHE = "false"
+  NODE_ENV = "production"
