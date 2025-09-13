@@ -1,12 +1,19 @@
-export const headerData = [
-  { title: "Home", href: "/" },
-  { title: "Categories", href: "/categories" },
-  { title: "New Arrivals", href: "/blog" },
-  // { title: "Contact", href: "/contact" },
-    { title: "Hot Selling", href: "/deal" },
-
-  { title: "Best Deals", href: "/deal" },
+// constants/statuses.ts
+export const statuses = [
+  {
+    title: "NEW ARRIVALS",
+    value: "new",
+  },
+  {
+    title: "HOT SELLING",
+    value: "hot",
+  },
+  {
+    title: "BEST DEALS",
+    value: "sale",
+  },
 ];
+
 
 export const productType = [
   { title: "Gadget", value: "gadget" },

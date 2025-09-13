@@ -181,7 +181,7 @@ const SearchBar = () => {
                     </h3>
                     {product.price && (
                       <p className="text-sm font-semibold text-tech_orange mt-0.5">
-                        ${product.price}
+                        LKR {product.price}
                       </p>
                     )}
                   </div>

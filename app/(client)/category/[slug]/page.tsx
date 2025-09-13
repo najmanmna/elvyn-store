@@ -7,9 +7,9 @@ import React from "react";
 const CategoryPage = async ({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string }; // <-- ❌ remove Promise here
 }) => {
-  const { slug } = await params;
+  const { slug } = params; // <-- no need for await
   const categories = await getCategories();
 
   return (
@@ -18,7 +18,7 @@ const CategoryPage = async ({
         <Title className="text-xl">
           Products by Category:{" "}
           <span className="font-bold text-green-600 capitalize tracking-wide">
-            {slug && slug}
+            {slug}
           </span>
         </Title>
 
