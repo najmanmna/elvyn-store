@@ -8,9 +8,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Ignore false secret scans
-[[plugins]]
-  package = "@netlify/plugin-lighthouse"
-  [plugins.inputs]
-    ignore_env = ["NEXT_PUBLIC_SANITY_DATASET"]
