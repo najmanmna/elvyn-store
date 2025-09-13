@@ -29,46 +29,60 @@ const CarouselWithDots = ({ banner }: { banner: any[] }) => {
   }, [api]);
 
   return (
-    <Container className="mt-5">
-      <div className="w-full lg:col-span-3">
-        <Carousel
-          className="relative w-full rounded-md overflow-hidden"
-          setApi={onInit}
-        >
-          <CarouselContent>
-            {banner.map((item, index) => (
-              <CarouselItem key={index}>
-                <div className="relative w-full sm:w-3/4 aspect-[4/3] sm:aspect-[21/9] flex items-center justify-center mx-auto">
-                  {item?.image && (
-                    <Image
-                      src={urlFor(item?.image).url()}
-                      alt={`Banner ${index + 1}`}
-                      fill
-                      className="object-cover sm:object-contain"
-                      priority={index === 0}
-                    />
-                  )}
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
+    <div className="w-full lg:col-span-3">
+      <Carousel
+        className="relative w-full  overflow-hidden"
+        setApi={onInit}
+        opts={{ loop: true }}
+      >
+        <CarouselContent>
+          {banner.map((item, index) => (
+            <CarouselItem key={index} className="pl-0">
+              <div className="relative w-full h-[80vh] aspect-[4/3] sm:aspect-[21/9] flex items-center justify-center mx-auto">
+                {item?.image && (
+                  <Image
+                    src={urlFor(item?.image).url()}
+                    alt={`Banner ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                )}
+                {/* 👇 Overlay button */}
+                <a
+                  href={item?.link || "/shop"}
+                  className={`
+    absolute sm:bottom-20 sm:left-35 bottom-6
+    px-5 py-2 font-normal shadow-md transition border
+    ${
+      item?.buttonTheme === "light"
+        ? "bg-transparent text-white border-white hover:text-gray-100"
+        : "bg-transparent text-black border-black hover:text-gray-800"
+    }
+  `}
+                >
+                  SHOP NOW
+                </a>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
 
-          {/* Dots */}
-          <div className="flex justify-center mt-3 gap-2">
-            {banner.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => api?.scrollTo(i)}
-                className={`h-3 w-3 rounded-full transition ${
-                  selectedIndex === i ? "bg-tech_orange" : "bg-gray-300"
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
-        </Carousel>
-      </div>
-    </Container>
+        {/* Dots */}
+        <div className="flex justify-center mt-3 gap-2">
+          {banner.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => api?.scrollTo(i)}
+              className={`h-3 w-3 rounded-full transition ${
+                selectedIndex === i ? "bg-tech_orange" : "bg-gray-300"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </Carousel>
+    </div>
   );
 };
 

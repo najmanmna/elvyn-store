@@ -12,30 +12,19 @@ export const bannerType = defineType({
       title: "Banner Title",
       type: "string",
     }),
-    // defineField({
-    //   name: "slug",
-    //   type: "slug",
-    //   options: {
-    //     source: "name",
-    //   },
-    // }),
-    // defineField({
-    //   name: "description",
-    //   title: "Sale Description",
-    //   type: "text",
-    // }),
-    // defineField({
-    //   name: "badge",
-    //   title: "Discount Badge",
-    //   type: "string",
-    //   description: "Discount Badge Ratio",
-    // }),
-    // defineField({
-    //   name: "discountAmount",
-    //   title: "Discount Amount",
-    //   type: "number",
-    //   description: "Amount off in percentage or fixed value",
-    // }),
+    defineField({
+      name: "buttonTheme",          // use a lowercase key for frontend access
+      title: "Button Theme",
+      type: "string",
+      options: {
+        list: [
+          { title: "Light", value: "light" },
+          { title: "Dark", value: "dark" },
+        ],
+        layout: "radio",            // or "dropdown" for a select menu
+      },
+      initialValue: "dark",         // optional default
+    }),
     defineField({
       name: "image",
       title: "Product Image",
@@ -49,20 +38,11 @@ export const bannerType = defineType({
     select: {
       title: "name",
       media: "image",
-      // discountAmount: "discountAmount",
-      // couponCode: "couponCode",
     },
-    prepare(select) {
-      const {
-        title,
-        media,
-        // discountAmount, couponCode
-      } = select;
-
+    prepare({ title, media }) {
       return {
         title,
         media,
-        // subtitle: `${discountAmount}% off - Code: ${couponCode}`,
       };
     },
   },

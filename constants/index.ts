@@ -1,15 +1,15 @@
 // constants/statuses.ts
 export const statuses = [
   {
-    title: "NEW ARRIVALS",
+    title: "New Arrivals",
     value: "new",
   },
   {
-    title: "HOT SELLING",
+    title: "Hot Selling",
     value: "hot",
   },
   {
-    title: "BEST DEALS",
+    title: "Best Deals",
     value: "sale",
   },
 ];
@@ -29,9 +29,19 @@ export const quickLinksData = [
     { title: "Refund & Return Policy", href: "/privacy" },
   { title: "Terms & Conditions", href: "/terms" },
 
+
+
+
   // { title: "FAQs", href: "/faqs" },
   // { title: "Help", href: "/help" },
 ];
+
+  export const quickLinksDataMenu = [
+  { title: "About us", href: "/about" },
+
+  // { title: "Contact us", href: "/contact" },
+  { title: "Refund & Return Policy", href: "/privacy" },];
+  
 export const categoriesData = [
   { title: "Tote Bags", href: "tote" },
   { title: "Shoulder Bags", href: "shoulder" },

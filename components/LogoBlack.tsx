@@ -10,7 +10,7 @@ interface Props {
 const Logo = ({ className }: Props) => {
   return (
     <Link href={"/"} className="w-40">
-      <Image src={logo_black} alt="logo" className={cn("w-30", className)} />
+      <Image src={logo_black} alt="logo" className={cn("w-40", className)} />
     </Link>
   );
 };

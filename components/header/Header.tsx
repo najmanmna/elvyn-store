@@ -8,7 +8,7 @@ import CartMenu from "../CartMenu";
 const Header = async () => {
   return (
     <header className="sticky top-0 z-50 bg-tech_bg_color text-tech_black backdrop-blur-md shadow-md">
-      <Container className="relative flex items-center justify-between py-4">
+      <Container className="relative flex items-center justify-between py-6">
         {/* Left - Menu */}
         <div className="flex items-center">
           <MobileMenu />

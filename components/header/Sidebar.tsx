@@ -1,10 +1,12 @@
 import { X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import Logo from "../LogoWhite";
 import Link from "next/link";
 import { useOutsideClick } from "@/hooks";
+import { quickLinksDataMenu } from "@/constants";
+
 
 import { Category } from "@/sanity.types";
 import { statuses } from "@/constants";
@@ -19,6 +21,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, categories }) => {
   const pathname = usePathname();
   const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
 
+  const [hovered, setHovered] = useState<"bags" | "accessories" | null>(null);
+
   return (
     <div
       className={`fixed inset-y-0 h-screen left-0 z-50 w-72 sm:w-full bg-primary/50 shadow-xl transform ${
@@ -30,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, categories }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.3 }}
-        className="min-w-72 max-w-96 bg-tech_black z-50 h-screen p-10 border-r border-r-tech_white flex flex-col gap-6"
+        className="min-w-72 max-w-96 bg-tech_black z-50 h-screen p-10 border-r border-r-tech_white flex flex-col gap-7"
       >
         {/* Logo + Close */}
         <div className="flex items-center justify-between">
@@ -46,45 +50,98 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, categories }) => {
         {/* Categories */}
         {categories && categories.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 text-xl uppercase tracking-wide text-gray-200 mb-2">
-              <span>Categories</span>
-              <span className="text-3xl font-bold">→</span>
+            {/* BAGS */}
+            <div
+              className="cursor-pointer"
+              onMouseEnter={() => setHovered("bags")}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <div className="flex items-center font-bold gap-8 text-xl uppercase hover:text-white hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)] tracking-wide text-gray-200 mb-7">
+                <span>BAGS<span className="text-3xl ml-5 font-bold">→</span></span>
+                
+              </div>
+
+              <AnimatePresence>
+                {hovered === "bags" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-col gap-2 pl-6 overflow-hidden mb-6"
+                  >
+                    {categories.map((cat) => (
+                      <Link
+                        onClick={onClose}
+                        key={cat._id}
+                        href={`/category/${cat.slug?.current}`}
+                        className={`hover:text-white hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)] transition text-gray-300 ${
+                          pathname === `/category/${cat.slug?.current}` &&
+                          "text-tech_orange"
+                        }`}
+                      >
+                        {cat.title}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="flex flex-col gap-2 pl-6">
-              {categories.map((cat) => (
-                <Link
-                  onClick={onClose}
-                  key={cat._id}
-                  href={`/category/${cat.slug?.current}`}
-                  className={`hover:text-white transition text-gray-300 ${
-                    pathname === `/category/${cat.slug?.current}` &&
-                    "text-tech_orange"
-                  }`}
+
+            {/* ACCESSORIES */}
+            <div
+              className="flex items-center font-bold gap-2 text-xl tracking-wide text-gray-200 hover:text-white hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)] cursor-pointer"
+              onMouseEnter={() => setHovered("accessories")}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <span>ACCESSORIES</span>
+            </div>
+
+            <AnimatePresence>
+              {hovered === "accessories" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="pl-6 pt-2 text-gray-500 text-sm"
                 >
-                  {cat.title}
-                </Link>
-              ))}
-            </div>
+                  (Coming Soon)
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
         {/* Statuses */}
         <div>
-    
-          <div className="flex flex-col gap-2 text-xl">
+          <div className="flex flex-col gap-8 text-xl font-bold">
             {statuses.map((status) => (
               <Link
                 onClick={onClose}
                 key={status.value}
                 href={`/deal/status/${status.value}`}
-                className={`hover:text-white transition text-gray-300 ${
-                  pathname === `/deal/status/${status.value}` && "text-tech_orange"
+                className={`hover:text-white transition hover:[text-shadow:0_0_10px_rgba(255,255,255,0.6)] text-gray-200 ${
+                  pathname === `/deal/status/${status.value}` &&
+                  "text-tech_orange"
                 }`}
               >
                 {status.title}
               </Link>
             ))}
           </div>
+          <ul className="space-y-3 mt-10">
+                        {quickLinksDataMenu?.map((item) => (
+                          <li key={item?.title}>
+                            <Link
+                              href={item?.href}
+                              className="text-gray-300 hover:text-white text-sm font-normal transition-colors"
+                            >
+                              {item?.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
         </div>
       </motion.div>
     </div>

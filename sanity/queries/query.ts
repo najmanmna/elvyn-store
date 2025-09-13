@@ -1,9 +1,16 @@
 import { defineQuery } from "next-sanity";
 
-// 🔹 Banner
-const BANNER_QUERY = defineQuery(
-  `*[_type == 'banner'] | order(publishedAt desc)`
-);
+// // 🔹 Banner
+// const BANNER_QUERY = defineQuery(
+//   `*[_type == 'banner'] | order(publishedAt desc)`
+// );
+
+// example in lib/queries.ts
+const BANNER_QUERY = `*[_type == "banner"]{
+  name,
+  buttonTheme,
+  image
+}`;
 
 // 🔹 Featured categories
 const FEATURED_CATEGORY_QUERY = defineQuery(
@@ -118,6 +125,7 @@ const ALLCATEGORIES_QUERY = defineQuery(
   `*[_type == 'category'] | order(name asc)[0...$quantity]`
 );
 
+
 // 🔹 Single Product By Slug (with variants)
 const PRODUCT_BY_SLUG_QUERY = defineQuery(`
   *[_type == "product" && slug.current == $slug][0]{
@@ -151,4 +159,5 @@ export {
   ADDRESS_QUERY,
   ALLCATEGORIES_QUERY,
   PRODUCT_BY_SLUG_QUERY,
+
 };
