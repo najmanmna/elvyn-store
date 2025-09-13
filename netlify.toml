@@ -4,15 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NETLIFY_DISABLE_SECRET_SCANNING = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-ignore_secrets = [
-  "NEXT_PUBLIC_SANITY_PROJECT_ID",
-  "NEXT_PUBLIC_SANITY_DATASET",
-  "NEXT_PUBLIC_SANITY_API_VERSION",
-  "VITE_SANITY_PROJECT_ID",
-  "VITE_SANITY_DATASET",
-  "VITE_SANITY_API_VERSION"
-]
