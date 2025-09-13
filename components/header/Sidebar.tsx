@@ -21,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, categories }) => {
 
   return (
     <div
-      className={`fixed inset-y-0 left-0 z-50 w-72 sm:w-80 bg-primary/50 shadow-xl transform ${
+      className={`fixed inset-y-0 h-screen left-0 z-50 w-72 sm:w-full bg-primary/50 shadow-xl transform ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       } transition-transform ease-in-out duration-300`}
       ref={sidebarRef}
@@ -37,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, categories }) => {
           <Logo />
           <button
             onClick={onClose}
-            className="hover:text-tech_white hoverEffect"
+            className="hover:text-tech_white hoverEffect text-gray-300"
           >
             <X />
           </button>
