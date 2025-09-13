@@ -230,7 +230,7 @@ const CartPage = () => {
                           {product?.name}
                         </Link>
                         <p className="text-sm text-gray-500 capitalize">
-                          Model: {model}
+                          Color: {model}
                         </p>
                       </div>
                       <button
