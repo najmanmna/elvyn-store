@@ -8,12 +8,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ✅ Top-level ignore_secrets (not tied to Lighthouse)
 ignore_secrets = [
-  "VITE_SANITY_PROJECT_ID",
-  "VITE_SANITY_DATASET",
-  "VITE_SANITY_API_VERSION",
   "NEXT_PUBLIC_SANITY_PROJECT_ID",
   "NEXT_PUBLIC_SANITY_DATASET",
-  "NEXT_PUBLIC_SANITY_API_VERSION"
+  "NEXT_PUBLIC_SANITY_API_VERSION",
+  "VITE_SANITY_PROJECT_ID",
+  "VITE_SANITY_DATASET",
+  "VITE_SANITY_API_VERSION"
 ]
