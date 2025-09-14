@@ -72,7 +72,7 @@ const ProductGrid = () => {
             <Link href="/shop">
            <button
   className="
-    bg-black text-white px-6 py-3 font-semibold rounded-lg border border-black
+    bg-black text-white px-6 py-3 font-semibold border border-black
     transition-all duration-300 ease-in-out
     hover:bg-white hover:text-black
     hover:shadow-[0_0_12px_2px_rgba(0,0,0,0.3)]

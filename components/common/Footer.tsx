@@ -52,7 +52,7 @@ const Footer = () => {
             </ul>
             <SocialMedia
               className="text-white"
-              iconClassName="border-gray-600 hover:border-orange-400 hover:text-white transition-colors"
+              iconClassName="border-black hover:font-bold hover:text-white transition-colors"
               tooltipClassName="bg-gray-800 text-white"
             />
           </div>
