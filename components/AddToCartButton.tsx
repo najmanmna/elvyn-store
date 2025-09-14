@@ -85,7 +85,7 @@ const AddToCartButton = ({
       ) : (
         <button
           className={cn(
-            "w-full py-2 px-4 bg-tech_orange text-white text-center rounded hover:bg-tech_orange/90 transition-colors flex items-center justify-center",
+            "w-full py-2 px-4 bg-tech_orange text-white text-center  hover:bg-tech_orange/90 transition-colors flex items-center justify-center",
             className
           )}
           onClick={handleAddToCart}

@@ -138,15 +138,37 @@ const PRODUCT_BY_SLUG_QUERY = defineQuery(`
     status,
     isFeatured,
     categories[]->{
+      _id,
       title
     },
-    variants[]{
+    variants[] {
       colorName,
       stock,
-      images[]{asset->{url}}
+      images[] {
+        asset->{url}
+      }
+    },
+    features[] {
+      label,
+      icon {
+        asset->{url}
+      }
+    },
+    specifications[] {
+      value,
+      icon {
+        asset->{url}
+      }
+    },
+    realImages[] {
+      asset->{url}
+    },
+    realVideos[] {
+      asset->{url}
     }
   }
 `);
+
 
 export {
   BANNER_QUERY,

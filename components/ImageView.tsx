@@ -1,12 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  internalGroqTypeReferenceTo,
-  SanityImageCrop,
-  SanityImageHotspot,
-} from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
-import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import {
@@ -17,36 +11,37 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+// ✅ new import for magnification
+import InnerImageZoom from "react-inner-image-zoom";
+import "react-inner-image-zoom/lib/styles.min.css";
+
 interface Props {
   images?: Array<{
-    asset?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-    };
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type: "image";
     _key: string;
+    asset?: { _ref: string };
   }>;
   isStock?: number;
 }
 
-const ImageView = ({ images = [], isStock }: Props) => {
+export default function ImageView({ images = [], isStock }: Props) {
   const [active, setActive] = useState(images[0]);
   const [showModal, setShowModal] = useState(false);
   const [initialSlide, setInitialSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Reset active image when variant changes
   useEffect(() => {
-    if (images.length > 0) {
-      setActive(images[0]);
-    }
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    if (images.length > 0) setActive(images[0]);
   }, [images]);
 
-  const openModal = (index: number) => {
-    setInitialSlide(index);
+  const openModal = (i: number) => {
+    setInitialSlide(i);
     setShowModal(true);
     document.body.style.overflow = "hidden";
   };
@@ -58,50 +53,49 @@ const ImageView = ({ images = [], isStock }: Props) => {
 
   return (
     <>
-      {/* Wrapper with thumbnails + large preview */}
       <div className="w-full md:w-2/5 flex flex-col md:flex-row gap-4">
-        {/* Thumbnails on the left (vertical on desktop, horizontal on mobile) */}
-        <div className="flex md:flex-col gap-2 md:gap-3 items-center md:items-start justify-start">
-          {images.map((image, idx) => (
+        {/* Thumbnails */}
+        <div className="flex md:flex-col gap-2 md:gap-3 items-center md:items-start">
+          {images.map((img, idx) => (
             <button
-              key={`${image._key ?? "img"}-${idx}`}
-              onClick={() => setActive(image)}
+              key={`${img._key}-${idx}`} // ✅ unique key
+              onClick={() => setActive(img)}
               className={`border rounded-md overflow-hidden w-16 h-16 md:w-20 md:h-20 ${
-                active?._key === image._key ? "ring-2 ring-tech_dark_color" : ""
+                active?._key === img._key ? "ring-2 ring-tech_dark_color" : ""
               }`}
             >
-              <Image
-                src={urlFor(image).url()}
-                alt={`Thumbnail ${image._key ?? idx}`}
-                width={100}
-                height={100}
+              <img
+                src={urlFor(img).url()}
+                alt={`thumb-${idx}`}
                 className="w-full h-full object-contain"
               />
             </button>
           ))}
         </div>
 
-        {/* Large Preview */}
+        {/* Magnified main image */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={active?._key ?? "img-active"}
+            key={active?._key}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex-1 max-h-[550px] min-h-[450px] border border-tech_dark_color/10 rounded-md group overflow-hidden cursor-pointer"
+            transition={{ duration: 0.3 }}
+            className="flex-1 border rounded-md overflow-hidden cursor-zoom-in"
             onClick={() =>
-              openModal(images.findIndex((img) => img._key === active?._key))
+              openModal(images.findIndex((i) => i._key === active?._key))
             }
           >
             {active && (
-              <Image
+              <InnerImageZoom
                 src={urlFor(active).url()}
-                alt="productImage"
-                width={700}
-                height={700}
-                priority
-                className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${
+                zoomSrc={urlFor(active).url()} // high-res for magnification
+                // zoomType="hover" // or "click"
+                zoomScale={isMobile ? 1.2 : 1.2}
+                zoomType={isMobile ? "click" : "hover"}
+                zoomPreload
+                // alt="product image"
+                className={`object-contain w-full max-h-full ${
                   isStock === 0 ? "opacity-50" : ""
                 }`}
               />
@@ -110,47 +104,49 @@ const ImageView = ({ images = [], isStock }: Props) => {
         </AnimatePresence>
       </div>
 
-      {/* Modal Carousel */}
+      {/* Modal carousel with zoom */}
       <AnimatePresence>
         {showModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-tech_black/50 bg-opacity-80 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
             onClick={closeModal}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-lg max-w-2xl w-full p-4 relative"
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white  max-w-2xl w-full p-4 relative max-h-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={closeModal}
-                className="absolute right-4 top-4 z-10 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 transition-colors"
+                className="absolute right-4 top-4 z-10 bg-white rounded-full p-1 shadow"
               >
                 <X className="h-6 w-6" />
               </button>
 
               <Carousel className="w-full" opts={{ startIndex: initialSlide }}>
                 <CarouselContent>
-                  {images.map((image, idx) => (
-                    <CarouselItem key={`${image._key ?? "img"}-modal-${idx}`}>
-                      <div className="flex items-center justify-center h-[500px]">
-                        <Image
-                          src={urlFor(image).url()}
-                          alt={`Product image ${image._key ?? idx}`}
-                          width={800}
-                          height={800}
-                          className="object-contain max-h-full"
+                  {images.map((img, idx) => (
+                    <CarouselItem key={`${img._key}-modal-${idx}`}>
+                      {" "}
+                      <div className="flex items-center justify-center ">
+                        <InnerImageZoom
+                          src={urlFor(img).url()}
+                          zoomSrc={urlFor(img).url()}
+                          // zoomType="hover"
+                          zoomScale={isMobile ? 1.1 : 1.1}
+                          zoomType={isMobile ? "click" : "hover"}
+                          zoomPreload
+                          className="object-contain max-h-[80vh] w-full"
                         />
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-
                 <CarouselPrevious className="-left-4" />
                 <CarouselNext className="-right-4" />
               </Carousel>
@@ -160,6 +156,4 @@ const ImageView = ({ images = [], isStock }: Props) => {
       </AnimatePresence>
     </>
   );
-};
-
-export default ImageView;
+}

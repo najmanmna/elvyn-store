@@ -50,7 +50,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
           href="https://wa.me/1234567890" // Replace with your WhatsApp number
           target="_blank"
           className="
-            fixed bottom-6 right-6 w-16 h-16 rounded-full bg-black
+            fixed bottom-2 sm:bottom-6 right-6 w-16 h-16 rounded-full bg-black
             flex items-center justify-center text-white shadow-lg
             hover:bg-green-600 hover:scale-110 transition-all duration-300
             z-50

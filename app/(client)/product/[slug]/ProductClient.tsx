@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import AddToCartButton from "@/components/AddToCartButton";
 import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
+import { Dialog } from "@headlessui/react";
 
 import Container from "@/components/Container";
 import Image from "next/image";
@@ -10,7 +11,7 @@ import { urlFor } from "@/sanity/lib/image";
 
 export default function ProductClient({ product }: { product: any }) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-
+ const [showGallery, setShowGallery] = useState(false);
   // ✅ always pick from variants (schema guarantees at least one)
   const rawVariant = product.variants[selectedVariantIndex];
   const selectedVariant = {
@@ -113,13 +114,13 @@ export default function ProductClient({ product }: { product: any }) {
             )}
 
             {/* Add to Cart + Buy Now */}
-            <div className="flex items-center gap-3 w-3/4 sm:w-1/2">
+            <div className="flex items-center gap-3 sm:w-3/4">
               <AddToCartButton
                 key={itemKey}
                 product={product}
                 variant={selectedVariant}
               />
-              <button className="w-36 bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition">
+              <button className="w-36 bg-gray-500 text-white py-2  hover:bg-gray-600 transition">
                 BUY NOW
               </button>
             </div>
@@ -127,6 +128,136 @@ export default function ProductClient({ product }: { product: any }) {
          
           </div>
         </div>
+         <div className="">
+      <div className="flex flex-col md:flex-row gap-10 items-start py-20">
+        {/* ---------- Left: Real Image + View More ---------- */}
+        <div className="w-full md:w-1/2">
+          {product?.realImages?.[0] ? (
+            <div className="flex flex-col items-center">
+              <Image
+                src={urlFor(product.realImages[0]).url()}
+                alt="Real product photo"
+                width={500}
+                height={500}
+                className="rounded-lg object-cover"
+              />
+              {product.realImages.length > 1 && (
+                <button
+                  onClick={() => setShowGallery(true)}
+                  className="mt-4  bg-black text-white px-6 py-3 font-semibold border border-black
+    transition-all duration-300 ease-in-out
+    hover:bg-white hover:text-black
+    hover:shadow-[0_0_12px_2px_rgba(0,0,0,0.3)]
+    hover:scale-105"
+                >
+                  VIEW MORE
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-500 italic">(To upload real photos)</p>
+          )}
+        </div>
+
+        {/* ---------- Right: Features, Description, Specs ---------- */}
+        <div className="w-full md:w-1/2 space-y-8">
+          {/* Features */}
+          {product?.features?.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
+              {product.features.map((f: any, idx: number) => (
+                <div key={idx} className="flex flex-col items-center gap-2">
+                  {f.icon && (
+                    <Image
+                      src={urlFor(f.icon).url()}
+                      alt={f.label}
+                      width={40}
+                      height={40}
+                    />
+                  )}
+                  <p className="text-sm font-medium">{f.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Description */}
+          {product?.description && (
+            <div className="border-y-2 border-black py-4">
+              <h3 className="text-lg font-semibold mb-2 ">DESCRIPTION</h3>
+              <p className="text-gray-700 text-sm leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+          )}
+
+          {/* Specifications */}
+          {product?.specifications?.length > 0 && (
+            <div className="flex items-center gap-10 flex-wrap">
+              {product.specifications.map((s: any, idx: number) => (
+                <div key={idx} className="flex flex-col items-center text-center">
+                  {s.icon && (
+                    <Image
+                      src={urlFor(s.icon).url()}
+                      alt={s.label}
+                      width={30}
+                      height={30}
+                    />
+                  )}
+                  <span className="font-medium">{s.value}</span>
+                  <span className="text-gray-600">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ---------- Modal for more real images ---------- */}
+      <Dialog open={showGallery} onClose={() => setShowGallery(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6">
+          <div className="bg-white p-6 rounded-lg max-w-5xl w-full overflow-y-auto">
+            <button
+              onClick={() => setShowGallery(false)}
+              className="mb-4 ml-auto block text-gray-600 hover:text-black"
+            >
+              ✕
+            </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {product.realImages.map((img: any, idx: number) => (
+                <Image
+                  key={idx}
+                  src={urlFor(img).url()}
+                  alt={`Real photo ${idx + 1}`}
+                  width={300}
+                  height={300}
+                  className="rounded-lg object-cover"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </div>
+     {/* ---------- IN YOUR STORY Section (Videos) ---------- */}
+      {product?.realVideos?.length > 0 && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold tracking-wide">IN YOUR STORY</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {product.realVideos.slice(0, 3).map((video: any, idx: number) => (
+              <div
+                key={idx}
+                className="relative w-full h-[70vh] aspect-[9/16] bg-black rounded-xl overflow-hidden"
+              >
+                <video
+                  src={video?.asset?.url}
+                  controls
+                  className="w-full h-[70vh] object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       </Container>
     </div>
   );
