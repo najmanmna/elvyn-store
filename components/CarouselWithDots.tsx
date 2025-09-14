@@ -38,7 +38,7 @@ const CarouselWithDots = ({ banner }: { banner: any[] }) => {
         <CarouselContent>
           {banner.map((item, index) => (
             <CarouselItem key={index} className="pl-0">
-              <div className="relative w-full h-[80vh] aspect-[4/3] sm:aspect-[21/9] flex items-center justify-center mx-auto">
+              <div className="relative w-full h-[60vh] sm:h-[80vh] aspect-[4/3] sm:aspect-[21/9] flex items-center justify-center mx-auto">
                 {item?.image && (
                   <Image
                     src={urlFor(item?.image).url()}
@@ -50,19 +50,23 @@ const CarouselWithDots = ({ banner }: { banner: any[] }) => {
                 )}
                 {/* 👇 Overlay button */}
                 <a
-                  href={item?.link || "/shop"}
-                  className={`
+  href={item?.link || "/shop"}
+  className={`
     absolute sm:bottom-20 sm:left-35 bottom-6
-    px-5 py-2 font-normal shadow-md transition border
+    px-5 py-2 font-normal border shadow-md
+    transition-all duration-300 ease-in-out
     ${
       item?.buttonTheme === "light"
-        ? "bg-transparent text-white border-white hover:text-gray-100"
-        : "bg-transparent text-black border-black hover:text-gray-800"
+        ? // Light theme: white border & glow
+          "bg-transparent text-white border-white hover:text-gray-100 hover:shadow-[0_0_12px_2px_rgba(255,255,255,0.6)]"
+        : // Dark theme: black border & glow
+          "bg-transparent text-black border-black hover:text-gray-800 hover:shadow-[0_0_12px_2px_rgba(0,0,0,0.5)]"
     }
   `}
-                >
-                  SHOP NOW
-                </a>
+>
+  SHOP NOW
+</a>
+
               </div>
             </CarouselItem>
           ))}

@@ -7,6 +7,7 @@ import { urlFor } from "@/sanity/lib/image";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const SearchBar = () => {
   const [search, setSearch] = useState("");
@@ -58,7 +59,10 @@ const SearchBar = () => {
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowResults(false);
         setShowSearch(false);
       }
@@ -76,16 +80,25 @@ const SearchBar = () => {
       {/* Desktop icon toggle */}
       <div className="hidden lg:block relative w-40 h-10 lg:w-[340px]">
         {!showSearch && (
-          <button
+          <motion.button
             type="button"
             onClick={() => {
               setShowSearch(true);
               setShowResults(true);
             }}
+            whileHover={{
+              scale: 1.15, // subtle grow
+              boxShadow: "0 0 12px rgba(255,255,255,0.35)", // soft glow ring
+            }}
+            transition={{ duration: 0.05, ease: "easeOut" }} // crisp 150 ms
             className="absolute right-0 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center"
           >
-            <Search className="w-6 h-6 text-black hover:text-gray" />
-          </button>
+            <Search
+              className="w-8 h-8 focus:outline-none
+                   bg-transparent text-black hover:drop-shadow-md
+                   hover:text-nuetral-500 transition-colors "
+            />
+          </motion.button>
         )}
         {showSearch && (
           <form
@@ -192,10 +205,13 @@ const SearchBar = () => {
             <div className="px-4 py-3">
               {search ? (
                 <p className="text-sm font-medium text-gray-700">
-                  No results for "<span className="text-tech_orange">{search}</span>"
+                  No results for "
+                  <span className="text-tech_orange">{search}</span>"
                 </p>
               ) : (
-                <p className="text-sm font-medium text-gray-700">Popular Products</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Popular Products
+                </p>
               )}
             </div>
           )}

@@ -70,9 +70,19 @@ const ProductGrid = () => {
           {/* Button below the grid */}
           <div className="flex justify-center mt-8">
             <Link href="/shop">
-              <button className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-semibold">
-                CARRY MORE
-              </button>
+           <button
+  className="
+    bg-black text-white px-6 py-3 font-semibold rounded-lg border border-black
+    transition-all duration-300 ease-in-out
+    hover:bg-white hover:text-black
+    hover:shadow-[0_0_12px_2px_rgba(0,0,0,0.3)]
+    hover:scale-105
+  "
+>
+  CARRY MORE
+</button>
+
+
             </Link>
           </div>
         </>

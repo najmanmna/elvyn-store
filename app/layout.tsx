@@ -19,7 +19,14 @@ export const metadata: Metadata = {
     template: "%s - Elvyn",
     default: "Elvyn",
   },
-  description: "Elvyn online store, Your one stop shop for all your needs",
+  description: "Elvyn Online Store",
+
+  // ✅ Add the favicon here
+  icons: {
+    icon: "/favicon.jpg",        // main favicon (stored in /public)
+    shortcut: "/favicon.jpg",    // optional shortcut for older browsers
+    apple: "/favicon.jpg",       // optional for iOS homescreen
+  },
 };
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {

@@ -49,7 +49,7 @@ const ProductStatusSelector = () => {
           <Image
             src={statuses[0].image}
             alt={statuses[0].title}
-            className="w-full object-contain transition-transform duration-500 group-hover:scale-105"
+            className="w-full object-cover h-full transition-transform duration-500 group-hover:scale-105"
             placeholder="blur"
           />
           <div className="absolute inset-0 bg-black/10 flex items-center justify-center">

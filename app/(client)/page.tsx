@@ -2,7 +2,6 @@
 import HomeBanner from "@/components/HomeBanner";
 import ProductGrid from "@/components/ProductGrid";
 
-import { getCategories } from "@/sanity/queries";
 import ProductStatusSelector from "@/components/ProductStatusSelector";
 import InstagramElfsight from "@/components/InstagramFeed";
 import FooterTop from "@/components/common/FooterTop";
