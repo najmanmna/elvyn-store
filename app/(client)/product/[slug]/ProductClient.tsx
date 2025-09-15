@@ -1,19 +1,27 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState ,useEffect } from "react";
 import AddToCartButton from "@/components/AddToCartButton";
 import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import { Dialog } from "@headlessui/react";
-import WhatsAppButton from "@/components/WhatsAppButton";
-
+// import WhatsAppButton from "@/components/WhatsAppButton";
+import toast from "react-hot-toast"; // ✅ import toast
 import Container from "@/components/Container";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+// ✅ imports added
+import { useRouter } from "next/navigation";
+import useCartStore from "@/store";
 
 export default function ProductClient({ product }: { product: any }) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   // ✅ always pick from variants (schema guarantees at least one)
+
+   const router = useRouter();
+  const addItem = useCartStore((state) => state.addItem);
+  const cartItems = useCartStore((state) => state.items);
+
   const rawVariant = product.variants[selectedVariantIndex];
   const selectedVariant = {
     id: rawVariant._key ?? rawVariant.id ?? String(selectedVariantIndex),
@@ -30,7 +38,43 @@ export default function ProductClient({ product }: { product: any }) {
 
   // ✅ unique cart key
   const itemKey = `${product._id}-${selectedVariant.id}`;
+const handleBuyNow = () => {
+  const stockAvailable = selectedVariant.stock ?? 0;
 
+  if (stockAvailable === 0) {
+    toast.error("This product is out of stock");
+    return; // 🚫 stop here
+  }
+
+  const itemKey = `${product._id}-${selectedVariant.id}`;
+  const existsInCart = cartItems.find((item) => item.itemKey === itemKey);
+
+  if (!existsInCart) {
+    addItem(product, selectedVariant);
+  }
+
+  router.push("/cart");
+};
+
+useEffect(() => {
+  // publish product info for the global Floating WhatsApp button
+  const info = {
+    name: product?.name ?? null,
+    slug: product?.slug?.current ?? null,
+  };
+
+  // store globally
+  (window as any).__PRODUCT_INFO = info;
+
+  // notify listeners
+  window.dispatchEvent(new Event("productInfo"));
+
+  // cleanup on unmount / when product changes
+  return () => {
+    delete (window as any).__PRODUCT_INFO;
+    window.dispatchEvent(new Event("productInfo"));
+  };
+}, [product]);
   return (
     <div className="bg-tech_white py-10">
       <Container>
@@ -124,7 +168,10 @@ export default function ProductClient({ product }: { product: any }) {
                 product={product}
                 variant={selectedVariant}
               />
-              <button className="w-36 bg-gray-500 text-white py-2  hover:bg-gray-600 transition">
+              <button
+                onClick={handleBuyNow}
+                className="w-36 bg-gray-500 text-white py-2 hover:bg-gray-600 transition"
+              >
                 BUY NOW
               </button>
             </div>
@@ -166,12 +213,12 @@ export default function ProductClient({ product }: { product: any }) {
               {/* Features */}
               {product?.features?.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
-                  {product.features.map((f: any, idx: number) => (
+                  {(product.features?? []).map((f: any, idx: number) => (
                     <div key={idx} className="flex flex-col items-center gap-2">
                       {f.icon && (
                         <Image
                           src={urlFor(f.icon).url()}
-                          alt={f.label}
+                        alt={f.label || "Product feature icon"} 
                           width={40}
                           height={40}
                         />
@@ -195,7 +242,7 @@ export default function ProductClient({ product }: { product: any }) {
               {/* Specifications */}
               {product?.specifications?.length > 0 && (
                 <div className="flex items-center gap-10 flex-wrap">
-                  {product.specifications.map((s: any, idx: number) => (
+                  {(product.specifications?? []).map((s: any, idx: number) => (
                     <div
                       key={idx}
                       className="flex flex-col items-center text-center"
@@ -203,7 +250,7 @@ export default function ProductClient({ product }: { product: any }) {
                       {s.icon && (
                         <Image
                           src={urlFor(s.icon).url()}
-                          alt={s.label}
+                          alt={s.label|| "Product spec icon"}
                           width={30}
                           height={30}
                         />
@@ -243,7 +290,7 @@ export default function ProductClient({ product }: { product: any }) {
                   ✕
                 </button>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {product.realImages.map((img: any, idx: number) => (
+                  {(product.realImages?? []).map((img: any, idx: number) => (
                     <Image
                       key={idx}
                       src={urlFor(img).url()}
@@ -263,7 +310,7 @@ export default function ProductClient({ product }: { product: any }) {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold tracking-wide">IN YOUR STORY</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {product.realVideos.slice(0, 3).map((video: any, idx: number) => (
+              {(product.realVideos?? []).slice(0, 3).map((video: any, idx: number) => (
                 <div
                   key={idx}
                   className="relative w-full h-[70vh] aspect-[9/16] bg-black rounded-xl overflow-hidden"
@@ -279,9 +326,9 @@ export default function ProductClient({ product }: { product: any }) {
           </div>
         )}
       </Container>
-      <WhatsAppButton
+      {/* <WhatsAppButton
         product={{ name: product?.name, slug: product?.slug?.current }}
-      />
+      /> */}
     </div>
   );
 }

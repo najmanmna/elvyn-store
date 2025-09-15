@@ -144,6 +144,7 @@ export const productType = defineType({
     },
   ],
   description: "Feature highlights shown above description (with icon + label)",
+  initialValue: [], // 
 }),
 defineField({
   name: "specifications",
@@ -164,6 +165,7 @@ defineField({
           title: "Value",
           type: "string", // e.g. 27 cm, Leather, 15L
           description: "Type with spaces to split words into lines",
+         
         },
       ],
       preview: {
@@ -172,6 +174,7 @@ defineField({
     },
   ],
   description: "Detailed product specifications shown below description",
+   initialValue: [], // 
 }),
 defineField({
   name: "realImages",
@@ -179,11 +182,13 @@ defineField({
   type: "array",
   of: [{ type: "image", options: { hotspot: true } }],
   description: "Upload real photos of the product",
+  initialValue: [], // 
 }),
     defineField({
       name: "description",
       title: "Description",
       type: "text",
+      
     }),
 defineField({
   name: "realVideos",
@@ -198,6 +203,7 @@ defineField({
     },
   ],
   description: "Upload real product videos (mp4, mov, etc.)",
+  initialValue: [], // 
 }),
 
 

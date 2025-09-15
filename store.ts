@@ -3,6 +3,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product } from "@/sanity.types";
 import type { SanityImage } from "@/types/sanity-helpers";
+import toast from "react-hot-toast"; // ✅ add this import
+
 
 export interface CartVariant {
   id: string;
@@ -51,25 +53,46 @@ const useCartStore = create<StoreState>()(
       favoriteProduct: [],
 
       // add item (increment if exists)
-     addItem: (product: Product, variant: CartVariant) =>
+addItem: (product: Product, variant: CartVariant) =>
   set((state) => {
     const itemKey = `${product._id}-${variant.id}`;
     const existing = state.items.find((i) => i.itemKey === itemKey);
 
-    if (existing) {
-      return {
-        items: state.items.map((i) =>
-          i.itemKey === itemKey ? { ...i, quantity: i.quantity + 1 } : i
-        ),
-      };
-    } else {
-      return {
-        items: [...state.items, { product, variant, itemKey, quantity: 1 }],
-      };
+    // 🔹 If no stock available at all
+    if ((variant.stock ?? 0) === 0) {
+      toast.error("This product is out of stock");
+      return state;
     }
+
+    // 🔹 If already in cart, check against stock
+    if (existing) {
+      if ((variant.stock ?? 0) > existing.quantity) {
+        toast.success(
+          `${product?.name?.substring(0, 40)}${
+            product?.name && product.name.length > 40 ? "..." : ""
+          } (${variant?.color ?? "default"}) added!`
+        );
+        return {
+          items: state.items.map((i) =>
+            i.itemKey === itemKey ? { ...i, quantity: i.quantity + 1 } : i
+          ),
+        };
+      } else {
+        toast.error("Cannot add more than available stock");
+        return state;
+      }
+    }
+
+    // 🔹 First time adding
+    toast.success(
+      `${product?.name?.substring(0, 40)}${
+        product?.name && product.name.length > 40 ? "..." : ""
+      } (${variant?.color ?? "default"}) added!`
+    );
+    return {
+      items: [...state.items, { product, variant, itemKey, quantity: 1 }],
+    };
   }),
-
-
 
       // remove one unit
       removeItem: (itemKey) =>

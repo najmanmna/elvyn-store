@@ -36,24 +36,16 @@ const AddToCartButton = ({
   const stockAvailable = variant.stock ?? 0;
   const isOutOfStock = stockAvailable === 0;
 
-  const handleAddToCart = () => {
-    if (stockAvailable > itemCount) {
-      addItem(product, {
-        id: variant.id,
-        color: variant.color,
-        images: variant.images,
-        stock: variant.stock,
-      });
+ // inside AddToCartButton.tsx
+const handleAddToCart = () => {
+  addItem(product, {
+    id: variant.id,
+    color: variant.color,
+    images: variant.images,
+    stock: variant.stock,
+  });
+};
 
-      toast.success(
-        `${product?.name?.substring(0, 40)}${
-          product?.name && product.name.length > 40 ? "..." : ""
-        } (${variant?.color ?? "default"}) added!`
-      );
-    } else {
-      toast.error("Cannot add more than available stock");
-    }
-  };
 
   const textColor =
     displayMode === "overlay" ? "text-white" : "text-tech_dark/80";

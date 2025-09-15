@@ -1,37 +1,57 @@
+// components/WhatsAppButton.tsx
 "use client";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function WhatsAppButton({
-  product,
-}: {
-  product?: { name?: string; slug?: string };
-}) {
+type Prod = { name?: string | null; slug?: string | null } | null;
+
+export default function WhatsAppButton({ product }: { product?: Prod }) {
+  const [prodState, setProdState] = useState<Prod>(product ?? null);
+  const [origin, setOrigin] = useState<string>("");
+
+  // set origin safely on client
   useEffect(() => {
-    console.log("👉 WhatsAppButton product:", product);
+    if (typeof window !== "undefined") setOrigin(window.location.origin);
+  }, []);
+
+  // Prefer prop product when passed; otherwise listen for global updates
+  useEffect(() => {
+    if (product) {
+      setProdState(product);
+      return;
+    }
+
+    // read any existing global product info
+    const globalInfo = (window as any).__PRODUCT_INFO ?? null;
+    setProdState(globalInfo);
+
+    // handler to pick up updates
+    const handler = () => {
+      setProdState((window as any).__PRODUCT_INFO ?? null);
+    };
+
+    window.addEventListener("productInfo", handler);
+    return () => window.removeEventListener("productInfo", handler);
   }, [product]);
 
   const phone = "94775507940";
 
-  // ✅ Only build message when product is defined
   const message = useMemo(() => {
-    if (product?.name && product?.slug) {
-      return `Hi, I'm interested in your product: ${product.name}\nCheck it here: ${window.location.origin}/product/${product.slug}`;
+    if (prodState?.name && prodState?.slug && origin) {
+      return `Hi, I'm interested in your product: ${prodState.name}\nCheck it here: ${origin}/product/${prodState.slug}`;
     }
     return "Hi, I want to know more about your store.";
-  }, [product]);
+  }, [prodState, origin]);
 
   const whatsappLink = `https://wa.me/${phone}?text=${encodeURIComponent(
     message
   )}`;
 
-  // ✅ Avoid rendering until we have product info (so no flash of wrong message)
-  if (!product) return null;
-
   return (
     <Link
       href={whatsappLink}
       target="_blank"
+      rel="noopener noreferrer"
       className="fixed bottom-2 sm:bottom-6 right-6 w-16 h-16 rounded-full bg-black
                  flex items-center justify-center text-white shadow-lg
                  hover:bg-green-600 hover:scale-110 transition-all duration-300 z-50"
