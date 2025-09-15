@@ -314,66 +314,16 @@ const CartPage = () => {
                         className="text-lg font-bold text-black"
                       />
                     </div>
+<Link href="/checkout" className="flex-1">
+  <Button
+    disabled={loading}
+    className="w-full rounded-md font-semibold tracking-wide mt-4"
+    size="lg"
+  >
+    {loading ? "Processing..." : "Proceed to Checkout"}
+  </Button>
+</Link>
 
-                    {addresses && (
-                      <div className="mt-4">
-                        <h3 className="font-medium mb-2">Delivery Address</h3>
-                        <RadioGroup
-                          defaultValue={addresses
-                            .find((a) => a.default)
-                            ?._id.toString()}
-                          className="space-y-2"
-                        >
-                          {addresses.map((address) => (
-                            <div
-                              key={address._id}
-                              onClick={() => setSelectedAddress(address)}
-                              className={`flex items-center space-x-2 cursor-pointer ${
-                                selectedAddress?._id === address._id
-                                  ? "text-tech_orange"
-                                  : ""
-                              }`}
-                            >
-                              <RadioGroupItem
-                                value={address._id.toString()}
-                                id={`address-${address._id}`}
-                              />
-                              <Label
-                                htmlFor={`address-${address._id}`}
-                                className="grid gap-0.5 flex-1 text-sm"
-                              >
-                                <span className="font-semibold">
-                                  {address.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground line-clamp-2">
-                                  {address.address}, {address.city}{" "}
-                                  {address.state} {address.zip}
-                                </span>
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-
-                        <Button
-                          variant="outline"
-                          className="w-full mt-3 text-xs"
-                          size="sm"
-                        >
-                          Add New Address
-                        </Button>
-                      </div>
-                    )}
-
-                    <Button
-                      onClick={() =>
-                        toast.success("Cart needs to be initialized!")
-                      }
-                      disabled={loading}
-                      className="w-full rounded-md font-semibold tracking-wide mt-4"
-                      size="lg"
-                    >
-                      {loading ? "Processing..." : "Confirm Order"}
-                    </Button>
                   </CardContent>
                 </Card>
               </div>
