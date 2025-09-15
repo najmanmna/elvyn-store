@@ -18,12 +18,12 @@ const socialLink = [
 
   {
     title: "Instagram",
-    href: "https://www.instagram.com",
+    href: "https://www.instagram.com/elvyn_official/#",
     icon: <Instagram className="w-5 h-5" />,
   },
   {
     title: "Facebook",
-    href: "https://www.facebook.com",
+    href: "https://www.facebook.com/share/1CK6tFGjwJ/?mibextid=wwXIfr",
     icon: <Facebook className="w-5 h-5" />,
   },
 

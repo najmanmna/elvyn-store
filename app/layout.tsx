@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { SanityLive } from "@/sanity/lib/live";
 import { Toaster } from "react-hot-toast";
-import Link from "next/link";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 import "./globals.css";
 
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   },
   description: "Elvyn Online Store",
   icons: {
-    icon: "/favicon.jpg",
-    shortcut: "/favicon.jpg",
-    apple: "/favicon.jpg",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
@@ -46,23 +46,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <SanityLive />
 
         {/* Floating WhatsApp Button */}
-        <Link
-          href="https://wa.me/1234567890" // Replace with your WhatsApp number
-          target="_blank"
-          className="
-            fixed bottom-2 sm:bottom-6 right-6 w-16 h-16 rounded-full bg-black
-            flex items-center justify-center text-white shadow-lg
-            hover:bg-green-600 hover:scale-110 transition-all duration-300
-            z-50
-          "
-        >
-          {/* WhatsApp SVG icon */}
-          <img
-            src="/whatsapp.svg"
-            alt="WhatsApp Business"
-            className="w-8 h-8"
-          />
-        </Link>
+        <WhatsAppButton />
       </body>
     </html>
   );

@@ -163,6 +163,7 @@ defineField({
           name: "value",
           title: "Value",
           type: "string", // e.g. 27 cm, Leather, 15L
+          description: "Type with spaces to split words into lines",
         },
       ],
       preview: {
