@@ -34,10 +34,11 @@ const CartPage = () => {
 
       try {
         const productIds = items.map((i) => i.product._id);
-        const query = `*[_type=="product" && _id in $ids]{
-          _id,
-          variants[]{ colorName, stock }
-        }`;
+   const query = `*[_type=="product" && _id in $ids]{
+  _id,
+  variants[]{ _key, colorName, stock }
+}`;
+
         const freshProducts = await client.fetch(query, { ids: productIds });
 
         items.forEach((item) => {
@@ -46,17 +47,17 @@ const CartPage = () => {
           );
           if (!fresh) return;
 
-          const matchedVariant = fresh.variants?.find(
-            (v: any) =>
-              v._key === item.variant?.id || v.colorName === item.variant?.color
-          );
+      const matchedVariant = fresh.variants?.find(
+  (v: any) => v._key === item.variant?._key
+);
 
-          if (matchedVariant) {
-            updateItemVariant(item.itemKey, {
-              ...item.variant,
-              stock: matchedVariant.stock,
-            });
-          }
+if (matchedVariant) {
+  updateItemVariant(item.itemKey, {
+    ...item.variant,
+    stock: matchedVariant.stock,
+  });
+}
+
         });
       } catch (err) {
         console.error("Failed to refresh stock:", err);

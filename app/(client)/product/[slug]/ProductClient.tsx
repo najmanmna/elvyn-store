@@ -17,19 +17,20 @@ export default function ProductClient({ product }: { product: any }) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   // ✅ always pick from variants (schema guarantees at least one)
-
+ 
    const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
 
   const rawVariant = product.variants[selectedVariantIndex];
   const selectedVariant = {
-    id: rawVariant._key ?? rawVariant.id ?? String(selectedVariantIndex),
+     _key: rawVariant._key, 
     color: rawVariant.colorName ?? rawVariant.color ?? rawVariant.name,
     stock: rawVariant.stock ?? 0,
     images: rawVariant.images ?? [],
   };
 
+  
   // ✅ images for ImageView
   const images =
     selectedVariant.images?.length > 0
@@ -37,7 +38,7 @@ export default function ProductClient({ product }: { product: any }) {
       : (product.images ?? []);
 
   // ✅ unique cart key
-  const itemKey = `${product._id}-${selectedVariant.id}`;
+  const itemKey = `${product._id}-${selectedVariant._key}`;
 const handleBuyNow = () => {
   const stockAvailable = selectedVariant.stock ?? 0;
 
@@ -46,7 +47,7 @@ const handleBuyNow = () => {
     return; // 🚫 stop here
   }
 
-  const itemKey = `${product._id}-${selectedVariant.id}`;
+  const itemKey = `${product._id}-${selectedVariant._key}`;
   const existsInCart = cartItems.find((item) => item.itemKey === itemKey);
 
   if (!existsInCart) {

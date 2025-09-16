@@ -7,11 +7,13 @@ import toast from "react-hot-toast"; // ✅ add this import
 
 
 export interface CartVariant {
-  id: string;
+  _key: string;        // ✅ Sanity's unique key for the variant
   color?: string;
   stock?: number;
   images?: SanityImage[];
 }
+
+
 
 export interface CartItem {
   product: Product;
@@ -55,7 +57,7 @@ const useCartStore = create<StoreState>()(
       // add item (increment if exists)
 addItem: (product: Product, variant: CartVariant) =>
   set((state) => {
-    const itemKey = `${product._id}-${variant.id}`;
+    const itemKey = `${product._id}-${variant._key}`;
     const existing = state.items.find((i) => i.itemKey === itemKey);
 
     // 🔹 If no stock available at all

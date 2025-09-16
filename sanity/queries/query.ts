@@ -153,6 +153,7 @@ const PRODUCT_BY_SLUG_QUERY = defineQuery(`
       title
     },
     variants[] {
+      _key,   
       colorName,
       stock,
       images[] {

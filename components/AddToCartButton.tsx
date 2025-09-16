@@ -9,7 +9,7 @@ import { ShoppingCart } from "lucide-react";
 import type { SanityImage } from "@/types/sanity-helpers";
 
 interface VariantShape {
-  id: string;
+  _key: string;
   color?: string;
   stock?: number;
   images?: SanityImage[];
@@ -30,7 +30,7 @@ const AddToCartButton = ({
   const { addItem, getItemCount } = useCartStore();
 
   // ✅ Always build itemKey with variant
-  const itemKey = `${product._id}-${variant.id}`;
+  const itemKey = `${product._id}-${variant._key}`;
   const itemCount = getItemCount(itemKey);
 
   const stockAvailable = variant.stock ?? 0;
@@ -39,7 +39,7 @@ const AddToCartButton = ({
  // inside AddToCartButton.tsx
 const handleAddToCart = () => {
   addItem(product, {
-    id: variant.id,
+    _key: variant._key,
     color: variant.color,
     images: variant.images,
     stock: variant.stock,

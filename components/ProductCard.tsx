@@ -6,10 +6,12 @@ import Title from "./Title";
 import { image } from "@/sanity/image";
 
 interface VariantShape {
+   _key: string;
   colorName?: string;
   stock?: number;
   images?: { asset?: { url?: string } }[];
 }
+
 
 const ProductCard = ({ product }: { product: Product & { variants?: VariantShape[] } }) => {
   // ✅ Collect first image from each variant safely

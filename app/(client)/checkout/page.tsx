@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import useCartStore from "@/store";
 import PriceFormatter from "@/components/PriceFormatter";
@@ -50,7 +50,6 @@ const colomboCityAreas = [
   "Colombo 15 - Modara",
 ];
 
-
 const colomboSuburbs = [
   "Sri Jayawardenepura Kotte",
   "Dehiwala",
@@ -75,17 +74,15 @@ const colomboSuburbs = [
   "Nawinna",
   "Piliyandala",
   "Angoda",
-  "Athurugiriya"
+  "Athurugiriya",
 ];
-
-
-
-
 
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
-  const resetCart = useCartStore((s) => s.resetCart);
+  // ✅ add state at top
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const placingRef = useRef(false); // 🚀 instant flag
 
   const [form, setForm] = useState({
     firstName: "",
@@ -120,25 +117,23 @@ export default function CheckoutPage() {
     fetchShipping();
   }, []);
 
-useEffect(() => {
-  if (!deliveryCharges || !form.district || !form.city) return;
+  useEffect(() => {
+    if (!deliveryCharges || !form.district || !form.city) return;
 
-  let fee = deliveryCharges.others; // default
+    let fee = deliveryCharges.others; // default
 
-  if (form.district === "Colombo") {
-    if (colomboCityAreas.includes(form.city)) {
-      fee = deliveryCharges.colombo; // city limits
-    } else if (colomboSuburbs.includes(form.city)) {
-      fee = deliveryCharges.suburbs; // suburbs
-    } else {
-      fee = deliveryCharges.others; // fallback if unknown
+    if (form.district === "Colombo") {
+      if (colomboCityAreas.includes(form.city)) {
+        fee = deliveryCharges.colombo; // city limits
+      } else if (colomboSuburbs.includes(form.city)) {
+        fee = deliveryCharges.suburbs; // suburbs
+      } else {
+        fee = deliveryCharges.others; // fallback if unknown
+      }
     }
-  }
 
-  setShippingCost(fee);
-}, [form.district, form.city, deliveryCharges]);
-
-
+    setShippingCost(fee);
+  }, [form.district, form.city, deliveryCharges]);
 
   // 🔹 Redirect if cart is empty
   useEffect(() => {
@@ -155,42 +150,71 @@ useEffect(() => {
   const total = subtotal + shippingCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (
-      !form.firstName ||
-      !form.lastName ||
-      !form.address ||
-      !form.district ||
-      !form.city ||
-      !form.phone
-    ) {
-      toast.error("Please fill in all required fields.");
+  console.log("🚀 Checkout payload:", {
+    form,
+    items,
+    total,
+    shippingCost,
+  });
+
+  if (placingRef.current) return; // block instantly
+  placingRef.current = true;
+  setIsPlacingOrder(true);
+
+  try {
+    const payload = {
+      form,
+      total,
+      shippingCost,
+      items: items.map((i) => ({
+        product: { _id: i.product._id, price: i.product.price },
+        variantKey: i.variant._key, // ✅ important for stock update
+        variant: {
+          _key: i.variant._key,
+          color: i.variant.color,
+          stock: i.variant.stock,
+          images: i.variant.images,
+        },
+        quantity: i.quantity,
+      })),
+    };
+
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 409) {
+        // 🔹 Stock conflict
+        toast.error(data.error || "Some items are out of stock.");
+      } else {
+        toast.error(data.error || "Checkout failed.");
+      }
+
+      placingRef.current = false;
+      setIsPlacingOrder(false);
       return;
     }
 
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ form, items, total }),
-      });
+    // ✅ success
+    toast.success("Order placed successfully!");
+    router.push(
+      `/success?orderNumber=${data.orderId}&payment=${form.payment}`
+    );
+  } catch (err) {
+    console.error("❌ Checkout error:", err);
+    toast.error("Failed to place order.");
+    placingRef.current = false;
+    setIsPlacingOrder(false);
+  }
+};
 
-      if (!res.ok) throw new Error("Checkout failed");
-
-      const data = await res.json();
-
-      toast.success("Order placed successfully!");
-      router.push(
-        `/success?orderNumber=${data.orderId}&payment=${form.payment}`
-      );
-      //   setTimeout(() => resetCart(), 200);
-      // Redirect with order number + payment
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to place order.");
-    }
-  };
 
   return (
     <Container className="py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -235,56 +259,56 @@ useEffect(() => {
               />
             </div>
 
-           {/* District */}
-<div>
-  <Label htmlFor="district">District *</Label>
-  <select
-    id="district"
-    className="w-full border rounded-md p-2"
-    value={form.district}
-    onChange={(e) =>
-      setForm((prev) => ({
-        ...prev,
-        district: e.target.value,
-        city: "", // reset city when district changes
-      }))
-    }
-    required
-  >
-    <option value="">Select District</option>
-    {Object.keys(DISTRICTS).map((district) => (
-      <option key={district} value={district}>
-        {district}
-      </option>
-    ))}
-  </select>
-</div>
+            {/* District */}
+            <div>
+              <Label htmlFor="district">District *</Label>
+              <select
+                id="district"
+                className="w-full border rounded-md p-2"
+                value={form.district}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    district: e.target.value,
+                    city: "", // reset city when district changes
+                  }))
+                }
+                required
+              >
+                <option value="">Select District</option>
+                {Object.keys(DISTRICTS).map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-{/* City */}
-<div>
-  <Label htmlFor="city">Town / City *</Label>
-  <select
-    id="city"
-    className="w-full border rounded-md p-2"
-    value={form.city}
-    onChange={(e) =>
-      setForm((prev) => ({
-        ...prev,
-        city: e.target.value,
-      }))
-    }
-    disabled={!form.district}
-    required
-  >
-    <option value="">Select City</option>
-    {form.district &&
-      DISTRICTS[form.district]?.map((city) => (
-        <option key={city} value={city}>
-          {city}
-        </option>
-      ))}
-  </select>
-</div>
+            {/* City */}
+            <div>
+              <Label htmlFor="city">Town / City *</Label>
+              <select
+                id="city"
+                className="w-full border rounded-md p-2"
+                value={form.city}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    city: e.target.value,
+                  }))
+                }
+                disabled={!form.district}
+                required
+              >
+                <option value="">Select City</option>
+                {form.district &&
+                  DISTRICTS[form.district]?.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
             {/* Phone */}
             <div>
@@ -323,63 +347,58 @@ useEffect(() => {
           <CardHeader>
             <CardTitle>Payment Method</CardTitle>
           </CardHeader>
-         <CardContent>
-  <RadioGroup
-    defaultValue="COD"
-    onValueChange={(v) => setForm({ ...form, payment: v })}
-  >
-    <div className="flex items-center space-x-2">
-      <RadioGroupItem value="COD" id="cod" />
-      <Label htmlFor="cod">Cash on Delivery</Label>
-    </div>
-    <div className="flex items-center space-x-2">
-      <RadioGroupItem value="BANK" id="bank" />
-      <Label htmlFor="bank">Bank Transfer</Label>
-    </div>
-  </RadioGroup>
+          <CardContent>
+            <RadioGroup
+              defaultValue="COD"
+              onValueChange={(v) => setForm({ ...form, payment: v })}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="COD" id="cod" />
+                <Label htmlFor="cod">Cash on Delivery</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="BANK" id="bank" />
+                <Label htmlFor="bank">Bank Transfer</Label>
+              </div>
+            </RadioGroup>
 
-  {/* 🔹 Show bank details if BANK selected */}
-{form.payment === "BANK" && (
-  <div className="mt-4 p-3 rounded-md border bg-gray-50 text-sm text-gray-700">
-    <p className="font-medium mb-2">Bank Transfer Details:</p>
+            {/* 🔹 Show bank details if BANK selected */}
+            {form.payment === "BANK" && (
+              <div className="mt-4 p-3 rounded-md border bg-gray-50 text-sm text-gray-700">
+                <p className="font-medium mb-2">Bank Transfer Details:</p>
 
-    <div className="bg-white border rounded px-3 py-2 text-sm flex justify-between items-start">
-      <div className="flex-1 whitespace-pre-wrap font-mono">
-        Bank: Amana bank
+                <div className="bg-white border rounded px-3 py-2 text-sm flex justify-between items-start">
+                  <div className="flex-1 whitespace-pre-wrap font-mono">
+                    M.J.M IFHAM
+                    {"\n"}0110290723001
+                    {"\n"}Amana Bank Dehiwala
+                  </div>
 
-        {"\n"}Branch: Dehiwala
-        {"\n"}Account Name: M.J.M IFHAM
-        {"\n"}Account Number: 0110290723001
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const details = `M.J.M IFHAM 
+                      0110290723001
+                      Amana Bank Dehiwala
+        
+     `;
+                      await navigator.clipboard.writeText(details);
+                      toast.success("Bank details copied!");
+                    }}
+                    className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
+                  >
+                    Copy
+                  </button>
+                </div>
 
-      </div>
-
-      <button
-        type="button"
-        onClick={async () => {
-          const details = `Bank: Amana bank
-Branch: Dehiwala
-Account Name: M.J.M IFHAM
-Account Number: 0110290723001`;
-          await navigator.clipboard.writeText(details);
-          toast.success("Bank details copied!");
-        }}
-        className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
-      >
-        Copy
-      </button>
-    </div>
-
-    <p className="mt-2 text-xs text-gray-600 italic">
-      ⚠️ Please mention your <strong>name</strong> or <strong>Order Number </strong> 
-      as the payment reference when doing the transfer.
-    </p>
-  </div>
-)}
-
-
-
-</CardContent>
-
+                <p className="mt-2 text-xs text-gray-600 italic">
+                  ⚠️ Please mention your <strong>name</strong> or{" "}
+                  <strong>Order Number </strong>
+                  as the payment reference when doing the transfer.
+                </p>
+              </div>
+            )}
+          </CardContent>
         </Card>
 
         {/* ✅ Privacy + Terms */}
@@ -418,9 +437,10 @@ Account Number: 0110290723001`;
 
         <Button
           type="submit"
-          className="w-full font-semibold tracking-wide mx-2 mt-4"
+          disabled={isPlacingOrder} // prevent double clicks
+          className="w-full font-semibold tracking-wide mx-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Confirm Order
+          {isPlacingOrder ? "Placing Order..." : "Confirm Order"}
         </Button>
       </form>
 

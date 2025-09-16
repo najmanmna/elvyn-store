@@ -19,6 +19,8 @@ const ProductGrid = () => {
     "categories": categories[]->title
   }`;
 
+  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -62,6 +64,7 @@ const ProductGrid = () => {
                 >
                   {/* ✅ use generated type directly */}
                   <ProductCard key={product?._id} product={product} />
+                  
                 </motion.div>
               </AnimatePresence>
             ))}

@@ -9,7 +9,7 @@ import type { SanityImage } from "@/types/sanity-helpers";
 import { twMerge } from "tailwind-merge";
 
 interface VariantShape {
-  id: string;
+  _key: string;
   color?: string;
   stock?: number;
   images?: SanityImage[];
@@ -43,7 +43,7 @@ const QuantityButtons = ({
   }, []);
 
   // ✅ always compute key with variant
-  const computedItemKey = itemKey ?? `${product._id}-${variant.id}`;
+  const computedItemKey = itemKey ?? `${product._id}-${variant._key}`;
 
   // subscribe to cart state
   const cartItem = useCartStore((s) =>
@@ -86,7 +86,7 @@ const QuantityButtons = ({
     if (itemCount === 0) {
       // add fresh item with full variant
       addItem(product, {
-        id: variant.id,
+        _key: variant._key,
         color: variant.color,
         stock: variant.stock,
         images: variant.images,
