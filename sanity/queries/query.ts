@@ -13,6 +13,15 @@ const BANNER_QUERY = `*[_type == "banner"]{
 }
   `;
 
+  const SHIPPING_QUERY = `*[_type == "settings"][0]{
+  deliveryCharges {
+    colombo,
+    suburbs,
+    others
+  }
+}`;
+
+
 
 // 🔹 Featured categories
 const FEATURED_CATEGORY_QUERY = defineQuery(
@@ -183,5 +192,6 @@ export {
   ADDRESS_QUERY,
   ALLCATEGORIES_QUERY,
   PRODUCT_BY_SLUG_QUERY,
+  SHIPPING_QUERY
 
 };

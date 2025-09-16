@@ -142,6 +142,8 @@ const getProductBySlug = async (slug: string) => {
   }
 };
 
+
+
 export {
   getBanner,
   getFeaturedCategory,

@@ -162,7 +162,7 @@ useEffect(() => {
             )}
 
             {/* Add to Cart + Buy Now */}
-            <div className="flex items-center gap-3 w-3/4 sm:w-1/2">
+            <div className="flex items-center gap-3 w-full sm:w-1/2">
               <AddToCartButton
                 key={itemKey}
                 product={product}

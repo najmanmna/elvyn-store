@@ -8,9 +8,11 @@ import { bannerType } from "./bannerType";
 import { brandType } from "./brandTypes";
 import { authorType } from "./authType";
 import { addressType } from "./addressType";
+import { settingsType } from "./settings";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
+      settingsType,
     blockContentType,
     categoryType,
     productType,

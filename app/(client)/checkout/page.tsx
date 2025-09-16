@@ -15,20 +15,103 @@ import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import Container from "@/components/Container";
+import { DISTRICTS } from "@/constants/SrilankaDistricts";
 
 // 🔹 Districts + Cities (simplified)
-const DISTRICTS: Record<string, string[]> = {
-  Colombo: ["Colombo 01", "Colombo 02", "Colombo 03", "Dehiwala", "Moratuwa"],
-  Gampaha: ["Negombo", "Gampaha", "Minuwangoda", "Ja-Ela"],
-  Kandy: ["Kandy", "Peradeniya", "Katugastota"],
-};
+// const DISTRICTS: Record<string, string[]> = {
+//   Colombo: ["Colombo 01", "Colombo 02", "Colombo 03", "Dehiwala", "Moratuwa"],
+//   Gampaha: ["Negombo", "Gampaha", "Minuwangoda", "Ja-Ela"],
+//   Kandy: ["Kandy", "Peradeniya", "Katugastota"],
+// };
+
+const SHIPPING_QUERY = `*[_type == "settings"][0]{
+  deliveryCharges {
+    colombo,
+    suburbs,
+    others
+  }
+}`;
+const colomboCityAreas = [
+  "Colombo 01 - Fort",
+  "Colombo 02 - Slave Island",
+  "Colombo 03 - Kollupitiya",
+  "Colombo 04 - Bambalapitiya",
+  "Colombo 05 - Havelock Town",
+  "Colombo 06 - Wellawatte",
+  "Colombo 07 - Cinnamon Gardens",
+  "Colombo 08 - Borella",
+  "Colombo 09 - Dematagoda",
+  "Colombo 10 - Maradana",
+  "Colombo 11 - Pettah",
+  "Colombo 12 - Hulftsdorp",
+  "Colombo 13 - Kotahena",
+  "Colombo 14 - Grandpass",
+  "Colombo 15 - Modara",
+];
+
+
+const colomboSuburbs = [
+  "Sri Jayawardenepura Kotte",
+  "Dehiwala",
+  "Mount Lavinia",
+  "Moratuwa",
+  "Kaduwela",
+  "Maharagama",
+  "Kesbewa",
+  "Homagama",
+  "Kolonnawa",
+  "Rajagiriya",
+  "Nugegoda",
+  "Pannipitiya",
+  "Boralesgamuwa",
+  "Malabe",
+  "Kottawa",
+  "Pelawatta",
+  "Ratmalana",
+  "Kohuwala",
+  "Battaramulla",
+  "Thalawathugoda",
+  "Nawinna",
+  "Piliyandala",
+  "Angoda",
+  "Athurugiriya"
+];
+
+
+import { Copy } from "lucide-react";
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className="flex items-center justify-between bg-white border rounded px-2 py-1 text-sm">
+      <span>
+        <strong>{label}:</strong> {value}
+      </span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-gray-500 hover:text-black flex items-center gap-1"
+      >
+        <Copy size={14} />
+        {copied && <span className="text-xs text-green-600">Copied!</span>}
+      </button>
+    </div>
+  );
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const resetCart = useCartStore((s) => s.resetCart);
 
-  const [shippingCost, setShippingCost] = useState<string | number>("FREE");
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -40,20 +123,47 @@ export default function CheckoutPage() {
     notes: "",
     payment: "COD",
   });
-
   // 🔹 Fetch shipping cost from Sanity
+
+  const [deliveryCharges, setDeliveryCharges] = useState<{
+    colombo: number;
+    suburbs: number;
+    others: number;
+  } | null>(null);
+
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
   useEffect(() => {
     async function fetchShipping() {
       try {
-        const query = `*[_type=="settings"][0]{shipping}`;
-        const data = await client.fetch(query);
-        setShippingCost(data?.shipping ?? "FREE");
+        const data = await client.fetch(SHIPPING_QUERY);
+        setDeliveryCharges(data?.deliveryCharges ?? null);
       } catch (err) {
         console.error("Failed to fetch shipping:", err);
       }
     }
     fetchShipping();
   }, []);
+
+useEffect(() => {
+  if (!deliveryCharges || !form.district || !form.city) return;
+
+  let fee = deliveryCharges.others; // default
+
+  if (form.district === "Colombo") {
+    if (colomboCityAreas.includes(form.city)) {
+      fee = deliveryCharges.colombo; // city limits
+    } else if (colomboSuburbs.includes(form.city)) {
+      fee = deliveryCharges.suburbs; // suburbs
+    } else {
+      fee = deliveryCharges.others; // fallback if unknown
+    }
+  }
+
+  setShippingCost(fee);
+}, [form.district, form.city, deliveryCharges]);
+
+
 
   // 🔹 Redirect if cart is empty
   useEffect(() => {
@@ -66,11 +176,8 @@ export default function CheckoutPage() {
     (t, it) => t + (it.product.price ?? 0) * it.quantity,
     0
   );
-  const shippingFee =
-    typeof shippingCost === "string" && shippingCost.toLowerCase() === "free"
-      ? 0
-      : Number(shippingCost || 0);
-  const total = subtotal + shippingFee;
+
+  const total = subtotal + shippingCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,9 +209,8 @@ export default function CheckoutPage() {
       router.push(
         `/success?orderNumber=${data.orderId}&payment=${form.payment}`
       );
-    //   setTimeout(() => resetCart(), 200);
+      //   setTimeout(() => resetCart(), 200);
       // Redirect with order number + payment
-      
     } catch (err) {
       console.error(err);
       toast.error("Failed to place order.");
@@ -112,7 +218,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="container mx-auto py-10 grid md:grid-cols-2 gap-8">
+    <Container className="py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* LEFT: Checkout Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
@@ -154,45 +260,56 @@ export default function CheckoutPage() {
               />
             </div>
 
-            {/* District */}
-            <div>
-              <Label>District *</Label>
-              <select
-                className="w-full border rounded-md p-2"
-                value={form.district}
-                onChange={(e) =>
-                  setForm({ ...form, district: e.target.value, city: "" })
-                }
-                required
-              >
-                <option value="">Select District</option>
-                {Object.keys(DISTRICTS).map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
+           {/* District */}
+<div>
+  <Label htmlFor="district">District *</Label>
+  <select
+    id="district"
+    className="w-full border rounded-md p-2"
+    value={form.district}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        district: e.target.value,
+        city: "", // reset city when district changes
+      }))
+    }
+    required
+  >
+    <option value="">Select District</option>
+    {Object.keys(DISTRICTS).map((district) => (
+      <option key={district} value={district}>
+        {district}
+      </option>
+    ))}
+  </select>
+</div>
 
-            {/* City */}
-            <div>
-              <Label>Town / City *</Label>
-              <select
-                className="w-full border rounded-md p-2"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                disabled={!form.district}
-                required
-              >
-                <option value="">Select City</option>
-                {form.district &&
-                  DISTRICTS[form.district]?.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-              </select>
-            </div>
+{/* City */}
+<div>
+  <Label htmlFor="city">Town / City *</Label>
+  <select
+    id="city"
+    className="w-full border rounded-md p-2"
+    value={form.city}
+    onChange={(e) =>
+      setForm((prev) => ({
+        ...prev,
+        city: e.target.value,
+      }))
+    }
+    disabled={!form.district}
+    required
+  >
+    <option value="">Select City</option>
+    {form.district &&
+      DISTRICTS[form.district]?.map((city) => (
+        <option key={city} value={city}>
+          {city}
+        </option>
+      ))}
+  </select>
+</div>
 
             {/* Phone */}
             <div>
@@ -231,21 +348,63 @@ export default function CheckoutPage() {
           <CardHeader>
             <CardTitle>Payment Method</CardTitle>
           </CardHeader>
-          <CardContent>
-            <RadioGroup
-              defaultValue="COD"
-              onValueChange={(v) => setForm({ ...form, payment: v })}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="COD" id="cod" />
-                <Label htmlFor="cod">Cash on Delivery</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="BANK" id="bank" />
-                <Label htmlFor="bank">Bank Transfer</Label>
-              </div>
-            </RadioGroup>
-          </CardContent>
+         <CardContent>
+  <RadioGroup
+    defaultValue="COD"
+    onValueChange={(v) => setForm({ ...form, payment: v })}
+  >
+    <div className="flex items-center space-x-2">
+      <RadioGroupItem value="COD" id="cod" />
+      <Label htmlFor="cod">Cash on Delivery</Label>
+    </div>
+    <div className="flex items-center space-x-2">
+      <RadioGroupItem value="BANK" id="bank" />
+      <Label htmlFor="bank">Bank Transfer</Label>
+    </div>
+  </RadioGroup>
+
+  {/* 🔹 Show bank details if BANK selected */}
+{form.payment === "BANK" && (
+  <div className="mt-4 p-3 rounded-md border bg-gray-50 text-sm text-gray-700">
+    <p className="font-medium mb-2">Bank Transfer Details:</p>
+
+    <div className="bg-white border rounded px-3 py-2 text-sm flex justify-between items-start">
+      <div className="flex-1 whitespace-pre-wrap font-mono">
+        Bank: Amana bank
+
+        {"\n"}Branch: Dehiwala
+        {"\n"}Account Name: M.J.M IFHAM
+        {"\n"}Account Number: 0110290723001
+
+      </div>
+
+      <button
+        type="button"
+        onClick={async () => {
+          const details = `Bank: Commercial Bank
+Branch: Colombo Fort
+Account Name: Your Shop Name
+Account Number: 1234567890`;
+          await navigator.clipboard.writeText(details);
+          toast.success("Bank details copied!");
+        }}
+        className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
+      >
+        Copy
+      </button>
+    </div>
+
+    <p className="mt-2 text-xs text-gray-600 italic">
+      ⚠️ Please mention your <strong>name</strong> or <strong>Order Number </strong> 
+      as the payment reference when doing the transfer.
+    </p>
+  </div>
+)}
+
+
+
+</CardContent>
+
         </Card>
 
         {/* ✅ Privacy + Terms */}
@@ -284,7 +443,7 @@ export default function CheckoutPage() {
 
         <Button
           type="submit"
-          className="w-full rounded-md font-semibold tracking-wide mt-4"
+          className="w-full font-semibold tracking-wide mx-2 mt-4"
         >
           Confirm Order
         </Button>
@@ -297,29 +456,35 @@ export default function CheckoutPage() {
             <CardTitle>Your Order</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {items.map(({ product, variant, quantity, itemKey }) => (
-              <div
-                key={itemKey}
-                className="flex justify-between items-center border-b pb-2"
-              >
-                <div className="flex items-center space-x-3">
-                  <Image
-                    src={urlFor(
-                      variant?.images?.[0] ?? product.images?.[0]
-                    ).url()}
-                    alt={product?.name || "Product image"}
-                    width={50}
-                    height={50}
-                    className="rounded-md border"
-                  />
-                  <div>
-                    <p className="text-sm font-medium">{product?.name}</p>
-                    <p className="text-xs text-gray-500">x {quantity}</p>
+            {items.map(({ product, variant, quantity, itemKey }) => {
+              // 👇 pick variant image first, else fall back to product image
+              const imageSource = variant?.images?.[0] ?? product?.images?.[0];
+              const imageUrl = imageSource
+                ? urlFor(imageSource).url()
+                : "/fallback.png";
+
+              return (
+                <div
+                  key={itemKey}
+                  className="flex justify-between items-center border-b pb-2"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Image
+                      src={imageUrl}
+                      alt={product?.name || "Product image"}
+                      width={50}
+                      height={50}
+                      className="rounded-md border"
+                    />
+                    <div>
+                      <p className="text-sm font-medium">{product?.name}</p>
+                      <p className="text-xs text-gray-500">x {quantity}</p>
+                    </div>
                   </div>
+                  <PriceFormatter amount={(product.price ?? 0) * quantity} />
                 </div>
-                <PriceFormatter amount={(product.price ?? 0) * quantity} />
-              </div>
-            ))}
+              );
+            })}
 
             <div className="flex justify-between">
               <span>Subtotal</span>
@@ -328,11 +493,7 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>
-                {typeof shippingCost === "string"
-                  ? shippingCost
-                  : `Rs. ${shippingCost}`}
-              </span>
+              <span>{shippingCost === 0 ? "FREE" : `Rs. ${shippingCost}`}</span>
             </div>
 
             <div className="text-xs text-gray-500">
@@ -348,6 +509,6 @@ export default function CheckoutPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Container>
   );
 }
