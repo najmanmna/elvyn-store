@@ -79,33 +79,8 @@ const colomboSuburbs = [
 ];
 
 
-import { Copy } from "lucide-react";
 
-function CopyField({ label, value }: { label: string; value: string }) {
-  const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
-  return (
-    <div className="flex items-center justify-between bg-white border rounded px-2 py-1 text-sm">
-      <span>
-        <strong>{label}:</strong> {value}
-      </span>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="text-gray-500 hover:text-black flex items-center gap-1"
-      >
-        <Copy size={14} />
-        {copied && <span className="text-xs text-green-600">Copied!</span>}
-      </button>
-    </div>
-  );
-}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -381,10 +356,10 @@ useEffect(() => {
       <button
         type="button"
         onClick={async () => {
-          const details = `Bank: Commercial Bank
-Branch: Colombo Fort
-Account Name: Your Shop Name
-Account Number: 1234567890`;
+          const details = `Bank: Amana bank
+Branch: Dehiwala
+Account Name: M.J.M IFHAM
+Account Number: 0110290723001`;
           await navigator.clipboard.writeText(details);
           toast.success("Bank details copied!");
         }}
