@@ -8,12 +8,13 @@ export const bannerType = defineType({
   icon: TagIcon,
   fields: [
     defineField({
-      name: "name",
-      title: "Banner Title",
-      type: "string",
-    }),
-    defineField({
-      name: "buttonTheme",          // use a lowercase key for frontend access
+  name: "desktop",
+  title: "Desktop",
+  type: "object",
+  fields: [
+    { name: "image", title: "Image", type: "image", options: { hotspot: true } },
+    {
+      name: "buttonTheme",
       title: "Button Theme",
       type: "string",
       options: {
@@ -21,23 +22,39 @@ export const bannerType = defineType({
           { title: "Light", value: "light" },
           { title: "Dark", value: "dark" },
         ],
-        layout: "radio",            // or "dropdown" for a select menu
+        layout: "radio",
       },
-      initialValue: "dark",         // optional default
-    }),
-    defineField({
-      name: "image",
-      title: "Product Image",
-      type: "image",
+      initialValue: "dark",
+    },
+  ],
+}),
+defineField({
+  name: "mobile",
+  title: "Mobile",
+  type: "object",
+  fields: [
+    { name: "image", title: "Image", type: "image", options: { hotspot: true } },
+    {
+      name: "buttonTheme",
+      title: "Button Theme",
+      type: "string",
       options: {
-        hotspot: true,
+        list: [
+          { title: "Light", value: "light" },
+          { title: "Dark", value: "dark" },
+        ],
+        layout: "radio",
       },
-    }),
+      initialValue: "dark",
+    },
+  ],
+}),
+
   ],
   preview: {
     select: {
       title: "name",
-      media: "image",
+      media: "desktopImage", // 👈 preview desktop image in Studio
     },
     prepare({ title, media }) {
       return {

@@ -8,9 +8,11 @@ import { defineQuery } from "next-sanity";
 // example in lib/queries.ts
 const BANNER_QUERY = `*[_type == "banner"]{
   name,
-  buttonTheme,
-  image
-}`;
+  desktop { image, buttonTheme },
+  mobile { image, buttonTheme }
+}
+  `;
+
 
 // 🔹 Featured categories
 const FEATURED_CATEGORY_QUERY = defineQuery(
