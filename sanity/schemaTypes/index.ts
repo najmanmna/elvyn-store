@@ -4,7 +4,7 @@ import { blockContentType } from "./blockContentType";
 import { categoryType } from "./categoryType";
 import { productType } from "./productType";
 import { orderType } from "./orderType";
-import { orderItemType } from "./orderitem";
+import { orderItemType } from "./orderItem";
 import { bannerType } from "./bannerType";
 import { brandType } from "./brandTypes";
 import { authorType } from "./authType";
