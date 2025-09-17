@@ -12,16 +12,16 @@ export default defineConfig({
   schema,
   plugins: [
     structureTool({ structure,defaultDocumentNode }), // ✅ custom order dashboard
-    visionTool({
-      defaultApiVersion: process.env.VITE_SANITY_API_VERSION || "2024-11-09",
-    }),
-    presentationTool({
-      previewUrl: {
-        preview: "/",
-        previewMode: {
-          enable: "/draft-mode/enable",
-        },
-      },
-    }),
+    // visionTool({
+    //   defaultApiVersion: process.env.VITE_SANITY_API_VERSION || "2024-11-09",
+    // }),
+    // presentationTool({
+    //   previewUrl: {
+    //     preview: "/",
+    //     previewMode: {
+    //       enable: "/draft-mode/enable",
+    //     },
+    //   },
+    // }),
   ],
 });
