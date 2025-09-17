@@ -59,7 +59,7 @@ export const productType = defineType({
             select: {
               title: "colorName",
               subtitle: "stock",
-              media: "images.0",
+              media: "images.0.asset",
             },
             prepare({ title, subtitle, media }) {
               return {
@@ -169,7 +169,7 @@ defineField({
         },
       ],
       preview: {
-        select: { title: "label", subtitle: "value" },
+        select: { title: "value", subtitle: "value", media: "icon" },
       },
     },
   ],
@@ -209,18 +209,19 @@ defineField({
 
   ],
 
-  preview: {
-    select: {
-      title: "name",
-      media1: "variants.0.images.0",
-      subtitle: "price",
-    },
-    prepare({ title, subtitle, media1 }) {
-      return {
-        title,
-        subtitle: subtitle ? `LKR ${subtitle.toLocaleString("en-LK")}` : "",
-        media1,
-      };
-    },
+preview: {
+  select: {
+    title: "name",
+    subtitle: "price",
+    media: "variants.0.images.0.asset",
   },
+  prepare({ title, subtitle, media }) {
+    return {
+      title,
+      subtitle: subtitle ? `LKR ${subtitle.toLocaleString("en-LK")}` : "",
+      media: media || TrolleyIcon, // fallback
+    };
+  },
+},
+
 });

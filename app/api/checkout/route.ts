@@ -56,15 +56,21 @@ export async function POST(req: Request) {
 
     // ✅ Fetch latest product data from Sanity
     const productIds = items.map((it: any) => it.product._id);
-    const freshProducts = await backendClient.fetch(
-      `*[_type=="product" && _id in $ids]{
-        _id,
-        _rev,
-        name,
-        variants[]{_key, stock}
-      }`,
-      { ids: productIds }
-    );
+const freshProducts = await backendClient.fetch(
+  `*[_type=="product" && _id in $ids]{
+    _id,
+    _rev,
+    name,
+    images, // ✅ top-level fallback images
+    variants[]{
+      _key,
+      color,
+      stock,
+      images // ✅ include variant images
+    }
+  }`,
+  { ids: productIds }
+);
 
     // ✅ Check stock against cart
     for (const it of items) {
@@ -117,16 +123,38 @@ export async function POST(req: Request) {
 
       paymentMethod: form.payment || "COD",
 
-      items: items.map((it: any) => ({
-        _type: "orderItem",
-        _key: uuidv4(),
-        product: { _type: "reference", _ref: it.product._id },
-        variant:
-          typeof it.variant === "string" ? it.variant : it.variant?.color || "",
+ items: items.map((it: any) => {
+  const fresh = freshProducts.find((p: any) => p._id === it.product._id);
 
-        quantity: it.quantity,
-        price: it.product.price ?? 0,
-      })),
+  const matchedVariant = fresh?.variants?.find(
+    (v: any) => v._key === it.variant?._key
+  );
+
+  return {
+    _type: "orderItem",
+    _key: uuidv4(),
+    product: { _type: "reference", _ref: it.product._id },
+
+    variant: {
+      variantKey: matchedVariant?._key || it.variant?._key,
+      color: matchedVariant?.color || it.variant?.color || "",
+    },
+
+    quantity: it.quantity,
+    price: it.product.price ?? 0,
+
+    productName: fresh?.name || "Unknown",
+
+    // ✅ Snapshot image always: variant > product > none
+    productImage:
+      matchedVariant?.images?.[0] ||
+      fresh?.images?.[0] ||
+      undefined,
+  };
+}),
+
+
+
 
       subtotal: items.reduce(
         (acc: number, it: any) =>

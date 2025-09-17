@@ -150,72 +150,72 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost;
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  console.log("🚀 Checkout payload:", {
-    form,
-    items,
-    total,
-    shippingCost,
-  });
-
-  if (placingRef.current) return; // block instantly
-  placingRef.current = true;
-  setIsPlacingOrder(true);
-
-  try {
-    const payload = {
+    console.log("🚀 Checkout payload:", {
       form,
+      items,
       total,
       shippingCost,
-      items: items.map((i) => ({
-        product: { _id: i.product._id, price: i.product.price },
-        variantKey: i.variant._key, // ✅ important for stock update
-        variant: {
-          _key: i.variant._key,
-          color: i.variant.color,
-          stock: i.variant.stock,
-          images: i.variant.images,
-        },
-        quantity: i.quantity,
-      })),
-    };
-
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
+    if (placingRef.current) return; // block instantly
+    placingRef.current = true;
+    setIsPlacingOrder(true);
 
-    if (!res.ok) {
-      if (res.status === 409) {
-        // 🔹 Stock conflict
-        toast.error(data.error || "Some items are out of stock.");
-      } else {
-        toast.error(data.error || "Checkout failed.");
+    try {
+      const payload = {
+        form,
+        total,
+        shippingCost,
+        items: items.map((i) => ({
+          product: { _id: i.product._id, price: i.product.price },
+          variantKey: i.variant._key, // ✅ important for stock update
+          variant: {
+            _key: i.variant._key,
+            color: i.variant.color,
+            stock: i.variant.stock,
+            images: i.variant.images,
+          },
+          quantity: i.quantity,
+        })),
+      };
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 409) {
+          // 🔹 Stock conflict
+          toast.error(data.error || "Some items are out of stock.");
+        } else {
+          toast.error(data.error || "Checkout failed.");
+        }
+
+        placingRef.current = false;
+        setIsPlacingOrder(false);
+        return;
       }
+      window.scrollTo(0, 0);
 
+      // ✅ success
+      toast.success("Order placed successfully!");
+      sessionStorage.setItem("orderPlaced", "true");
+      router.push(
+        `/success?orderNumber=${data.orderId}&payment=${form.payment}&total=${total}`
+      );
+    } catch (err) {
+      console.error("❌ Checkout error:", err);
+      toast.error("Failed to place order.");
       placingRef.current = false;
       setIsPlacingOrder(false);
-      return;
-    }window.scrollTo(0, 0);
-
-
-    // ✅ success
-    toast.success("Order placed successfully!");
-    router.push(
-      `/success?orderNumber=${data.orderId}&payment=${form.payment}`
-    );
-  } catch (err) {
-    console.error("❌ Checkout error:", err);
-    toast.error("Failed to place order.");
-    placingRef.current = false;
-    setIsPlacingOrder(false);
-  }
-};
-
+    }
+  };
 
   return (
     <Container className="py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -366,31 +366,9 @@ export default function CheckoutPage() {
             {/* 🔹 Show bank details if BANK selected */}
             {form.payment === "BANK" && (
               <div className="mt-4 p-3 rounded-md border bg-gray-50 text-sm text-gray-700">
-                <p className="font-medium mb-2">Bank Transfer Details:</p>
+                <p className="font-medium mb-2">You’ll get bank details after order placement.</p>
 
-                <div className="bg-white border rounded px-3 py-2 text-sm flex justify-between items-start">
-                  <div className="flex-1 whitespace-pre-wrap font-mono">
-                    M.J.M IFHAM
-                    {"\n"}0110290723001
-                    {"\n"}Amana Bank Dehiwala
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const details = `M.J.M IFHAM 
-                      0110290723001
-                      Amana Bank Dehiwala
-        
-     `;
-                      await navigator.clipboard.writeText(details);
-                      toast.success("Bank details copied!");
-                    }}
-                    className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300"
-                  >
-                    Copy
-                  </button>
-                </div>
+                
 
                 <p className="mt-2 text-xs text-gray-600 italic">
                   ⚠️ Please mention your <strong>name</strong> or{" "}

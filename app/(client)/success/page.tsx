@@ -1,20 +1,49 @@
 "use client";
 import useCartStore from "@/store";
-import { Check, Home, ShoppingBag } from "lucide-react";
+import { Check, Home, ShoppingBag, Copy } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 const SuccessPage = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const orderNumber = searchParams.get("orderNumber");
   const paymentMethod = searchParams.get("payment") || "Cash on Delivery";
+  const total = searchParams.get("total"); // ✅ fetch total from query
+
   const resetCart = useCartStore((state) => state.resetCart);
+  const [validAccess, setValidAccess] = useState(false);
 
   useEffect(() => {
+    // ✅ Check both session + query params
+    const placed = sessionStorage.getItem("orderPlaced");
+    if (!orderNumber || !paymentMethod || !placed) {
+      router.replace("/"); // 🚫 Kick user out if bypassing
+      return;
+    }
+
+    setValidAccess(true);
     resetCart();
-  }, [resetCart]);
+
+    // one-time use flag
+    const handleUnload = () => {
+      sessionStorage.removeItem("orderPlaced");
+    };
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [orderNumber, paymentMethod, router, resetCart]);
+
+  if (!validAccess) return null; // don't render until verified
+
+  // ✅ Bank details text
+  const bankDetails = `M.J.M IFHAM
+0110290723001
+Amana Bank Dehiwala`;
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -42,16 +71,17 @@ const SuccessPage = () => {
             ship it soon.
           </p>
 
+          {/* Order Summary */}
           <div className="bg-gray-50 rounded-xl p-6 mt-8 border border-gray-100 text-left">
             <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
             <div className="space-y-3 text-sm sm:text-base">
               <div className="flex justify-between pb-2 border-b border-gray-200">
                 <span className="text-gray-600">Order Number:</span>
-                <span className="font-medium">{orderNumber || "N/A"}</span>
+                <span className="font-medium">{orderNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Shipping:</span>
-                <span className="font-medium">Domestic Courier – Rs. 240</span>
+                <span className="text-gray-600">Total:</span>
+                <span className="font-medium">Rs. {total || "N/A"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Estimated Delivery:</span>
@@ -64,6 +94,39 @@ const SuccessPage = () => {
             </div>
           </div>
 
+          {/* ✅ Show bank details only if Bank Transfer chosen */}
+          {paymentMethod.toLowerCase().includes("bank") && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mt-6 text-left">
+              <h3 className="font-semibold text-lg mb-3 text-yellow-800">
+                Bank Transfer Instructions
+              </h3>
+              <p className="text-sm text-gray-700 mb-4">
+                Please transfer <span className="font-medium">Rs. {total}</span>{" "}
+                using your <span className="font-medium">Order Number {orderNumber}</span>{" "}
+                as the payment reference. Your order will be processed once we confirm
+                the payment.
+              </p>
+
+              <p className="font-medium mb-2">Bank Transfer Details:</p>
+              <div className="bg-white border rounded px-3 py-2 text-sm flex justify-between items-start">
+                <div className="flex-1 whitespace-pre-wrap font-mono">
+                  {bankDetails}
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(bankDetails);
+                    toast.success("Bank details copied!");
+                  }}
+                  className="ml-3 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 flex items-center gap-1"
+                >
+                  <Copy className="w-3 h-3" /> Copy
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
             <Link
               href="/"

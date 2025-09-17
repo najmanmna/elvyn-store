@@ -110,22 +110,24 @@ export const orderType = defineType({
     }),
   ],
 
-  preview: {
-    select: {
-      name: "customerName",
-      total: "total",
-      orderId: "orderNumber",
-      status: "status",
-    },
-    prepare({ name, total, orderId, status }) {
-      const orderIdSnippet = orderId
-        ? `${orderId.slice(0, 5)}...${orderId.slice(-5)}`
-        : "No ID";
-      return {
-        title: `${name} (${orderIdSnippet})`,
-        subtitle: `Total: Rs. ${total} — ${status}`,
-        media: BasketIcon,
-      };
-    },
+preview: {
+  select: {
+    name: "customerName",
+    total: "total",
+    orderId: "orderNumber",
+    status: "status",
+    productName: "items.0.productName",     // snapshot name
+    productImage: "items.0.productImage",   // snapshot image
   },
+  prepare({ name, total, orderId, status, productImage }) {
+    return {
+      title: `${name} (${orderId || "No ID"})`,
+      subtitle: `Total: Rs. ${total} — ${status}}`,
+      media: productImage || undefined,
+    };
+  },
+},
+
+
+
 });

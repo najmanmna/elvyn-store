@@ -11,11 +11,17 @@ export const orderItemType = defineType({
       type: "reference",
       to: [{ type: "product" }],
     }),
-    defineField({
-      name: "variant",
-      title: "Variant",
-      type: "string",
-    }),
+  defineField({
+  name: "variant",
+  title: "Variant",
+  type: "object",
+  fields: [
+    { name: "color", title: "Color", type: "string" },
+    { name: "variantKey", title: "Variant Key", type: "string" }, // 👈 renamed
+  ],
+}),
+
+
     defineField({
       name: "quantity",
       title: "Quantity",
@@ -27,20 +33,47 @@ export const orderItemType = defineType({
       title: "Unit Price",
       type: "number",
     }),
+    defineField({
+      name: "productName",
+      title: "Product Name (snapshot)",
+      type: "string",
+    }),
+    defineField({
+      name: "productImage",
+      title: "Product Image (snapshot)",
+      type: "image",
+      options: { hotspot: true }, // ✅ make it optional + supports crop
+    }),
   ],
+
   preview: {
     select: {
-      product: "product.name",
+      snapName: "productName",
+      snapImage: "productImage",
+      refName: "product.name",
+      refVariants: "product.variants",
       quantity: "quantity",
       price: "price",
-      image: "product.images.0",
+      variant: "variant",
     },
-    prepare({ product, quantity, price, image }) {
-      return {
-        title: `${product} x${quantity}`,
-        subtitle: `Rs. ${price * quantity}`,
-        media: image,
-      };
-    },
+prepare({ snapName, snapImage, refName, refVariants, quantity, price, variant }) {
+  const name = snapName || refName || "Unknown Product";
+
+  let image = snapImage;
+
+  if (!image && refVariants && variant?.variantKey) {
+    const matched = refVariants.find((v: any) => v._key === variant.variantKey);
+    image = matched?.images?.[0];
+  }
+
+  const total = (price || 0) * (quantity || 0);
+
+  return {
+    title: `${quantity || 0} × ${name}`,
+    subtitle: `Rs. ${total}${variant?.color ? ` – ${variant.color}` : ""}`,
+    media: image || undefined,
+  };
+},
+
   },
 });
