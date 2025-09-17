@@ -4,6 +4,15 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
+    // ✅ Token check
+    if (!process.env.SANITY_API_TOKEN) {
+      console.error("❌ Missing SANITY_API_TOKEN");
+      return NextResponse.json(
+        { error: "Server misconfiguration" },
+        { status: 500 }
+      );
+    }
+
     const body = await req.json();
     const { form, items, total, shippingCost } = body;
 
@@ -77,7 +86,9 @@ export async function POST(req: Request) {
 
       if (variant.stock < it.quantity) {
         return NextResponse.json(
-          { error: `Insufficient stock for ${fresh.name} (${it.variant?.color || ""}). Only ${variant.stock} left.` },
+          {
+            error: `Insufficient stock for ${fresh.name} (${it.variant?.color || ""}). Only ${variant.stock} left.`,
+          },
           { status: 409 }
         );
       }
@@ -110,16 +121,16 @@ export async function POST(req: Request) {
         _type: "orderItem",
         _key: uuidv4(),
         product: { _type: "reference", _ref: it.product._id },
-        variant: typeof it.variant === "string"
-          ? it.variant
-          : it.variant?.color || "",
+        variant:
+          typeof it.variant === "string" ? it.variant : it.variant?.color || "",
 
         quantity: it.quantity,
         price: it.product.price ?? 0,
       })),
 
       subtotal: items.reduce(
-        (acc: number, it: any) => acc + (it.product.price ?? 0) * it.quantity,
+        (acc: number, it: any) =>
+          acc + (it.product.price ?? 0) * it.quantity,
         0
       ),
       shippingCost: shippingCost ?? 0,
@@ -145,11 +156,23 @@ export async function POST(req: Request) {
       }
     });
 
-    // Commit transaction
-    await tx.commit();
+    // ✅ Commit transaction and check result
+    const result = await tx.commit();
+
+    if (!result || !result.results?.length) {
+      console.error("❌ Transaction failed:", result);
+      return NextResponse.json(
+        { error: "Order could not be processed. Please try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
-      { message: "Order placed successfully!", orderId, payment: form.payment },
+      {
+        message: "Order placed successfully!",
+        orderId,
+        payment: form.payment,
+      },
       { status: 200 }
     );
   } catch (err) {

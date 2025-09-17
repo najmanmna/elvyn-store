@@ -200,7 +200,8 @@ export default function CheckoutPage() {
       placingRef.current = false;
       setIsPlacingOrder(false);
       return;
-    }
+    }window.scrollTo(0, 0);
+
 
     // ✅ success
     toast.success("Order placed successfully!");
